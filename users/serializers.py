@@ -1,21 +1,9 @@
 from datetime import date
 
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from users.enums import UserRole
 from users.models import User
-
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['name'] = user.name
-        token['email'] = user.email
-        token['role'] = user.role
-        return token
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,6 +21,19 @@ class UserSerializer(serializers.ModelSerializer):
         age = date.today().year - value.year - ((date.today().month, date.today().day) < (value.month, value.day))
         if age < 18:
             raise serializers.ValidationError("You must be at least 18 years old to register.")
+        return value
+
+    @staticmethod
+    def validate_email(value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
+
+    @staticmethod
+    def validate_cpf(value):
+        cpf = value.replace(".", "").replace("-", "")
+        if User.objects.filter(cpf=cpf).exists():
+            raise serializers.ValidationError("This CPF is already in use.")
         return value
 
     def create(self, validated_data):

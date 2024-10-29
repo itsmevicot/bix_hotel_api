@@ -1,6 +1,7 @@
 from typing import Optional
 
 from rest_framework import status
+from rest_framework.exceptions import APIException
 
 
 class ExceptionInterface:
@@ -9,7 +10,7 @@ class ExceptionInterface:
     message: Optional[str] = "An error occurred while processing your request"
 
 
-class ExceptionMessageBuilder(Exception):
+class ExceptionMessageBuilder(APIException):
     def __init__(self, ex_info: ExceptionInterface):
         self.title = ex_info.title
         self.status_code = ex_info.status_code

@@ -1,17 +1,16 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import CustomTokenObtainPairSerializer, UserSerializer
-from .services.client_service import ClientService
 
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+from users.serializers import UserSerializer
+from users.services.client_service import ClientService
 
 
 class ClientRegistrationView(APIView):
+    permission_classes = [AllowAny]
+
     def __init__(
             self,
             client_service: ClientService = None,
@@ -40,10 +39,19 @@ class ClientRegistrationView(APIView):
                     birth_date=serializer.validated_data['birth_date'],
                     password=serializer.validated_data['password']
                 )
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except Exception as e:
                 return Response(
-                    {"title": "Error", "message": str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    {
+                        "status": "success",
+                        "message": "Client successfully created.",
+                        "detail": serializer.data
+                    },
+                    status=status.HTTP_201_CREATED
                 )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                raise e
+        else:
+            return Response({
+                "status": "error",
+                "message": "Validation error.",
+                "detail": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
