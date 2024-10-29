@@ -1,14 +1,16 @@
 import re
 
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import EmailValidator
 from django.db import models
 from localflavor.br.models import BRCPFField
 
-from authentication.enums import UserRole
+from users.enums import UserRole
+from users.managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    name = models.CharField(max_length=255)
     email = models.EmailField(
         unique=True,
         validators=[EmailValidator(message="Enter a valid email address.")],
@@ -35,3 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def clean(self):
         self.cpf = re.sub(r'[.-]', '', self.cpf)
         super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)

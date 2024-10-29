@@ -1,0 +1,74 @@
+[
+    {
+        "model": "bookings.booking",
+        "pk": 1,
+        "fields": {
+            "check_in_date": "2024-10-01T15:00:00Z",
+            "check_out_date": "2024-10-05T11:00:00Z",
+            "status": "confirmed",
+            "client": 1,
+            "room": 3,
+            "created_at": "2024-09-25T10:00:00Z"
+        }
+    },
+    {
+        "model": "bookings.booking",
+        "pk": 2,
+        "fields": {
+            "check_in_date": "2024-10-02T14:00:00Z",
+            "check_out_date": "2024-10-06T10:00:00Z",
+            "status": "confirmed",
+            "client": 2,
+            "room": 6,
+            "created_at": "2024-09-26T11:00:00Z"
+        }
+    },
+    {
+        "model": "bookings.booking",
+        "pk": 3,
+        "fields": {
+            "check_in_date": "2024-10-03T13:00:00Z",
+            "check_out_date": "2024-10-07T09:00:00Z",
+            "status": "confirmed",
+            "client": 3,
+            "room": 10,
+            "created_at": "2024-09-27T12:00:00Z"
+        }
+    },
+    {
+        "model": "bookings.booking",
+        "pk": 4,
+        "fields": {
+            "check_in_date": "2024-10-04T12:00:00Z",
+            "check_out_date": "2024-10-08T08:00:00Z",
+            "status": "confirmed",
+            "client": 4,
+            "room": 17,
+            "created_at": "2024-09-28T13:00:00Z"
+        }
+    },
+    {
+        "model": "bookings.booking",
+        "pk": 5,
+        "fields": {
+            "check_in_date": "2024-10-05T11:00:00Z",
+            "check_out_date": "2024-10-09T07:00:00Z",
+            "status": "confirmed",
+            "client": 5,
+            "room": 18,
+            "created_at": "2024-09-29T14:00:00Z"
+        }
+    },
+    {
+        "model": "bookings.booking",
+        "pk": 6,
+        "fields": {
+            "check_in_date": "2024-10-06T10:00:00Z",
+            "check_out_date": "2024-10-10T08:00:00Z",
+            "status": "confirmed",
+            "client": 6,
+            "room": 16,
+            "created_at": "2024-09-30T15:00:00Z"
+        }
+    }
+]

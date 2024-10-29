@@ -2,13 +2,13 @@ from django.contrib.auth.models import BaseUserManager
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, cpf, birth_date, password=None, **extra_fields):
+    def create_user(self, name, email, cpf, birth_date, password=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set.")
         if not cpf:
             raise ValueError("The CPF field must be set.")
         email = self.normalize_email(email)
-        user = self.model(email=email, cpf=cpf, birth_date=birth_date, **extra_fields)
+        user = self.model(name=name, email=email, cpf=cpf, birth_date=birth_date, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user

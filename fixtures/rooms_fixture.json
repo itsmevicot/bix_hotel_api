@@ -1,0 +1,202 @@
+[
+    {
+        "model": "rooms.room",
+        "pk": 1,
+        "fields": {
+            "number": 101,
+            "type": "single",
+            "status": "available",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 2,
+        "fields": {
+            "number": 102,
+            "type": "single",
+            "status": "available",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 3,
+        "fields": {
+            "number": 103,
+            "type": "single",
+            "status": "occupied",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 4,
+        "fields": {
+            "number": 104,
+            "type": "single",
+            "status": "maintenance",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 5,
+        "fields": {
+            "number": 201,
+            "type": "double",
+            "status": "available",
+            "price": "150.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 6,
+        "fields": {
+            "number": 202,
+            "type": "double",
+            "status": "occupied",
+            "price": "150.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 7,
+        "fields": {
+            "number": 203,
+            "type": "double",
+            "status": "available",
+            "price": "150.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 8,
+        "fields": {
+            "number": 204,
+            "type": "double",
+            "status": "maintenance",
+            "price": "150.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 9,
+        "fields": {
+            "number": 301,
+            "type": "suite",
+            "status": "available",
+            "price": "200.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 10,
+        "fields": {
+            "number": 302,
+            "type": "suite",
+            "status": "occupied",
+            "price": "200.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 11,
+        "fields": {
+            "number": 303,
+            "type": "suite",
+            "status": "available",
+            "price": "200.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 12,
+        "fields": {
+            "number": 304,
+            "type": "suite",
+            "status": "maintenance",
+            "price": "200.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 13,
+        "fields": {
+            "number": 105,
+            "type": "single",
+            "status": "available",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 14,
+        "fields": {
+            "number": 205,
+            "type": "double",
+            "status": "available",
+            "price": "150.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 15,
+        "fields": {
+            "number": 305,
+            "type": "suite",
+            "status": "available",
+            "price": "200.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 16,
+        "fields": {
+            "number": 106,
+            "type": "single",
+            "status": "occupied",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 17,
+        "fields": {
+            "number": 206,
+            "type": "double",
+            "status": "occupied",
+            "price": "150.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 18,
+        "fields": {
+            "number": 306,
+            "type": "suite",
+            "status": "occupied",
+            "price": "200.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 19,
+        "fields": {
+            "number": 107,
+            "type": "single",
+            "status": "maintenance",
+            "price": "100.00"
+        }
+    },
+    {
+        "model": "rooms.room",
+        "pk": 20,
+        "fields": {
+            "number": 207,
+            "type": "double",
+            "status": "maintenance",
+            "price": "150.00"
+        }
+    }
+]

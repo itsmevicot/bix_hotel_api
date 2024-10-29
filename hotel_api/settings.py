@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication',
+    'users',
     'bookings',
     'rooms',
     'rest_framework',
@@ -81,6 +81,10 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
+    'DATE_FORMAT': "%d/%m/%Y",
+    'DATETIME_FORMAT': "%d/%m/%Y %H:%M",
+    'DATE_INPUT_FORMATS': ["%d/%m/%Y"],
+    'DATETIME_INPUT_FORMATS': ["%d/%m/%Y %H:%M"],
 }
 
 
@@ -208,4 +212,4 @@ CELERY_WORKER_SEND_TASK_EVENTS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'authentication.User'
+AUTH_USER_MODEL = 'users.User'

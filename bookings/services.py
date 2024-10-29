@@ -1,13 +1,14 @@
 import logging
 from datetime import datetime
 from typing import Optional
-from authentication.models import User
+from users.models import User
 from bookings.enums import BookingStatus
-from bookings.exceptions import RoomNotAvailableException
+
 from bookings.models import Booking
 from bookings.repository import BookingRepository
 from rooms.models import Room, RoomStatus
 from rooms.repository import RoomRepository
+from utils.exceptions import RoomNotAvailableException
 
 logger = logging.getLogger(__name__)
 

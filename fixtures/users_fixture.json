@@ -1,0 +1,68 @@
+[
+    {
+        "model": "authentication.user",
+        "pk": 1,
+        "fields": {
+            "username": "client1",
+            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
+            "email": "client1@example.com",
+            "role": "client",
+            "is_active": true
+        }
+    },
+    {
+        "model": "authentication.user",
+        "pk": 2,
+        "fields": {
+            "username": "client2",
+            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
+            "email": "client2@example.com",
+            "role": "client",
+            "is_active": true
+        }
+    },
+    {
+        "model": "authentication.user",
+        "pk": 3,
+        "fields": {
+            "username": "client3",
+            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
+            "email": "client3@example.com",
+            "role": "client",
+            "is_active": true
+        }
+    },
+    {
+        "model": "authentication.user",
+        "pk": 4,
+        "fields": {
+            "username": "client4",
+            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
+            "email": "client4@example.com",
+            "role": "client",
+            "is_active": true
+        }
+    },
+    {
+        "model": "authentication.user",
+        "pk": 5,
+        "fields": {
+            "username": "client5",
+            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
+            "email": "client5@example.com",
+            "role": "client",
+            "is_active": true
+        }
+    },
+    {
+        "model": "authentication.user",
+        "pk": 6,
+        "fields": {
+            "username": "client6",
+            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
+            "email": "client6@example.com",
+            "role": "client",
+            "is_active": true
+        }
+    }
+]
