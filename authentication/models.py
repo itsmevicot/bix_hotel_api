@@ -1,32 +1,37 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission
+import re
+
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.core.validators import EmailValidator
 from django.db import models
+from localflavor.br.models import BRCPFField
+
+from authentication.enums import UserRole
 
 
-class User(AbstractUser):
-    ROLE_CLIENT = 'client'
-    ROLE_STAFF = 'staff'
-    ROLE_MANAGER = 'manager'
-    ROLE_ADMIN = 'admin'
-
-    ROLE_CHOICES = [
-        (ROLE_CLIENT, 'Client'),
-        (ROLE_STAFF, 'Staff'),
-        (ROLE_MANAGER, 'Manager'),
-        (ROLE_ADMIN, 'Administrator'),
-    ]
-
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_CLIENT)
-
-    groups = models.ManyToManyField(
-        Group,
-        related_name="user_groups",
-        blank=True,
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(
+        unique=True,
+        validators=[EmailValidator(message="Enter a valid email address.")],
+        error_messages={'unique': "A user with this email already exists."}
     )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name="user_permissions",
-        blank=True,
+    cpf = BRCPFField(
+        max_length=11,
+        unique=True,
+        error_messages={'unique': "A user with this CPF already exists."}
     )
+    birth_date = models.DateField()
+    role = models.CharField(max_length=20, choices=UserRole.choices(), default=UserRole.CLIENT.value)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['cpf', 'birth_date']
+
+    objects = UserManager()
 
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f"{self.email} ({self.role})"
+
+    def clean(self):
+        self.cpf = re.sub(r'[.-]', '', self.cpf)
+        super().clean()

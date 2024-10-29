@@ -1,39 +1,28 @@
 from django.db import models
-from django.utils import timezone
-
-from clients.models import Client
-from rooms.models import Room
+from bookings.enums import BookingStatus
+from rooms.models import Room, RoomStatus
 
 
 class Booking(models.Model):
-    STATUS_CONFIRMED = 'confirmed'
-    STATUS_CANCELLED = 'cancelled'
-    STATUS_COMPLETED = 'completed'
-
-    STATUS_CHOICES = [
-        (STATUS_CONFIRMED, 'Confirmed'),
-        (STATUS_CANCELLED, 'Cancelled'),
-        (STATUS_COMPLETED, 'Completed'),
-    ]
-
     check_in_date = models.DateTimeField()
     check_out_date = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_CONFIRMED)
-    client = models.ForeignKey(Client, related_name='bookings', on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, related_name='bookings', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=20, choices=BookingStatus.choices(), default=BookingStatus.CONFIRMED.value)
+    client = models.ForeignKey('authentication.User', related_name='bookings', on_delete=models.CASCADE)
+    room = models.ForeignKey('rooms.Room', related_name='bookings', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Reservation for {self.client.user.username} - Room {self.room.number}"
+        return f"Reservation for {self.client.email} - Room {self.room.number}"
 
     class Meta:
         unique_together = ('check_in_date', 'room')
 
     def save(self, *args, **kwargs):
-        if self.status == self.STATUS_CONFIRMED and self.room.status == Room.STATUS_AVAILABLE:
-            self.room.status = Room.STATUS_OCCUPIED
+        if self.status == BookingStatus.CONFIRMED.value and self.room.status == RoomStatus.AVAILABLE.value:
+            self.room.status = RoomStatus.BOOKED.value
             self.room.save()
-        elif self.status == self.STATUS_CANCELLED:
-            self.room.status = Room.STATUS_AVAILABLE
+        elif self.status == BookingStatus.CANCELLED.value:
+            self.room.status = RoomStatus.AVAILABLE.value
             self.room.save()
         super().save(*args, **kwargs)
