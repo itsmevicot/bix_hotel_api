@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bookings.serializers import BookingSerializer
-from users.services import ClientService
+from users.services.client_service import ClientService
+
 from utils.exceptions import BookingCannotBeConfirmedException, UnauthorizedCancellationException
 
 
