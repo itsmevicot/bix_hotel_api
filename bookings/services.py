@@ -7,6 +7,7 @@ from bookings.exceptions import RoomNotAvailableException
 from bookings.models import Booking
 from bookings.repository import BookingRepository
 from rooms.models import Room, RoomStatus
+from rooms.repository import RoomRepository
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +15,11 @@ logger = logging.getLogger(__name__)
 class BookingService:
     def __init__(
             self,
-            booking_repository: Optional[BookingRepository] = None
+            booking_repository: Optional[BookingRepository] = None,
+            room_repository: Optional[RoomRepository] = None
     ):
         self.booking_repository = booking_repository or BookingRepository()
+        self.room_repository = room_repository or RoomRepository()
 
     def create(
             self,
@@ -38,7 +41,10 @@ class BookingService:
                 status=BookingStatus.CONFIRMED.value
             )
 
-            self.booking_repository.update_room_status(room, RoomStatus.BOOKED.value)
+            self.room_repository.set_status(
+                room,
+                RoomStatus.BOOKED.value
+            )
 
             logger.info(f"Booking created successfully for client {client.id} in room {room.id}.")
             return booking

@@ -25,11 +25,3 @@ class BookingRepository:
             status=status,
             created_at=timezone.now(),
         )
-
-    @staticmethod
-    def update_room_status(
-            room: Room,
-            status: str
-    ) -> None:
-        room.status = status
-        room.save()
