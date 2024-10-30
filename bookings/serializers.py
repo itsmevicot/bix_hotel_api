@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
+from bookings.enums import BookingStatus
 from bookings.models import Booking
+from rooms.enums import RoomType
 from rooms.serializers import RoomSerializer
 from users.serializers import UserSerializer
 
@@ -26,3 +28,11 @@ class BookingCreateSerializer(serializers.Serializer):
         if check_in_date >= check_out_date:
             raise serializers.ValidationError("Check-out date must be after check-in date.")
         return data
+
+
+class BookingFilterSerializer(serializers.Serializer):
+    check_in_date = serializers.DateField(required=False)
+    check_out_date = serializers.DateField(required=False)
+    status = serializers.ChoiceField(choices=BookingStatus.choices(), required=False)
+    room_type = serializers.ChoiceField(choices=RoomType.choices(), required=False)
+    client_id = serializers.IntegerField(required=False)

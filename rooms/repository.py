@@ -1,5 +1,6 @@
-from rooms.enums import RoomStatus
+from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
+from utils.exceptions import RoomNotAvailableException
 
 
 class RoomRepository:
@@ -12,17 +13,23 @@ class RoomRepository:
         room.save()
 
     @staticmethod
-    def is_room_available(
-            room: Room
-    ) -> bool:
-        return room.status == RoomStatus.AVAILABLE.value
-
-    @staticmethod
     def get_room_by_id(
             room_id: int
     ) -> Room:
-        return Room.objects.get(id=room_id)
+        room = Room.objects.get(id=room_id)
+
+        if not room:
+            raise Room.DoesNotExist
+
+        return room
 
     @staticmethod
-    def get_available_room() -> Room:
-        return Room.objects.filter(status=RoomStatus.AVAILABLE.value).first()
+    def get_available_room(
+            room_type: RoomType = None
+    ) -> Room:
+        room = Room.objects.filter(status=RoomStatus.AVAILABLE.value, type=room_type).first()
+
+        if not room:
+            raise RoomNotAvailableException()
+
+        return room

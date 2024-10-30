@@ -80,3 +80,20 @@ def send_booking_creation_email(
         logger.info(f"Booking creation email sent to {client_email} for room {booking_details['room_number']}.")
     except Exception as e:
         logger.error(f"Failed to send booking creation email to {client_email}: {e}")
+
+
+@shared_task
+def send_booking_modification_email(
+        client_email: str,
+        booking_details: dict
+):
+    try:
+        send_mail(
+            subject="Booking Modification",
+            message=f"Your booking for Room {booking_details['room_number']} has been modified.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[client_email],
+        )
+        logger.info(f"Booking modification email sent to {client_email} for room {booking_details['room_number']}.")
+    except Exception as e:
+        logger.error(f"Failed to send booking modification email to {client_email}: {e}")

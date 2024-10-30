@@ -40,3 +40,18 @@ class UnauthorizedCancellationException(ExceptionMessageBuilder):
         self.status_code = status.HTTP_403_FORBIDDEN
         self.detail = {"title": self.title, "message": self.message}
 
+
+class InvalidBookingModificationException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Invalid Booking Modification"
+        self.message = "Only confirmed bookings can be modified."
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = {"title": self.title, "message": self.message}
+
+
+class InvalidBookingConfirmationException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Invalid Booking Confirmation"
+        self.message = "Only pending bookings can be confirmed."
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = {"title": self.title, "message": self.message}

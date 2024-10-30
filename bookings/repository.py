@@ -39,7 +39,11 @@ class BookingRepository:
     def get_booking_by_id(
             booking_id: int
     ) -> Booking:
-        return Booking.objects.get(id=booking_id)
+        booking = Booking.objects.get(id=booking_id)
+        if not booking:
+            raise Booking.DoesNotExist
+
+        return booking
 
     @staticmethod
     def cancel_booking(
@@ -59,3 +63,26 @@ class BookingRepository:
             status=BookingStatus.PENDING.value,
             check_in_date__lte=threshold_date
         )
+
+    @staticmethod
+    def is_room_available(
+            room_id: int,
+            check_in_date: date,
+            check_out_date: date
+    ) -> bool:
+        conflicting_bookings = Booking.objects.filter(
+            room_id=room_id,
+            status=BookingStatus.CONFIRMED.value,
+            check_in_date__lt=check_out_date,
+            check_out_date__gt=check_in_date,
+        )
+
+        return not conflicting_bookings.exists()
+
+    @staticmethod
+    def get_filtered_bookings(filter_criteria: dict):
+        """
+        Fetch bookings based on filter criteria.
+        """
+        queryset = Booking.objects.filter(**filter_criteria)
+        return queryset
