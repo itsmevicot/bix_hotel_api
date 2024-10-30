@@ -17,6 +17,14 @@ class ExceptionMessageBuilder(APIException):
         self.message = ex_info.message
 
 
+class RoomNotFoundException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Room Not Found"
+        self.message = "The requested room does not exist."
+        self.status_code = status.HTTP_404_NOT_FOUND
+        self.detail = {"title": self.title, "message": self.message}
+
+
 class RoomNotAvailableException(ExceptionMessageBuilder):
     def __init__(self):
         self.title = "Room not available"

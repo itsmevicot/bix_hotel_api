@@ -33,3 +33,37 @@ class RoomRepository:
             raise RoomNotAvailableException()
 
         return room
+
+    @staticmethod
+    def get_all_rooms():
+        return Room.objects.all()
+
+    @staticmethod
+    def create_room(
+            number: str,
+            status: str,
+            room_type: str,
+            price: float
+    ) -> Room:
+        return Room.objects.create(
+            number=number,
+            status=status,
+            type=room_type,
+            price=price
+        )
+
+    @staticmethod
+    def update_room(
+            room: Room,
+            **kwargs
+    ) -> Room:
+        for key, value in kwargs.items():
+            setattr(room, key, value)
+        room.save()
+        return room
+
+    @staticmethod
+    def delete_room(
+            room: Room
+    ) -> None:
+        room.delete()
