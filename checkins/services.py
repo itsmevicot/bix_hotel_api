@@ -1,6 +1,6 @@
 import logging
-from datetime import datetime
 from typing import Optional
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -8,8 +8,8 @@ from bookings.enums import BookingStatus
 from bookings.repository import BookingRepository
 from checkins.enums import CheckInStatus, CheckOutStatus
 from checkins.repository import CheckInCheckOutRepository
+from utils.email_service import EmailService
 from utils.exceptions import AlreadyCheckedOutException, InvalidBookingStatusException, AlreadyCheckedInException
-
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,14 @@ class CheckInCheckOutService:
             check_in_out.check_in_timestamp = timezone.now()
             check_in_out.save()
 
+            EmailService.send_checkin(
+                booking.client.email,
+                {
+                    "room_number": booking.room.number,
+                    "check_in_date": check_in_out.check_in_timestamp,
+                }
+            )
+
             logger.info(f"Booking {booking_id} successfully checked in at {check_in_out.check_in_timestamp}.")
             return CheckInStatus.COMPLETED
 
@@ -78,6 +86,14 @@ class CheckInCheckOutService:
 
             booking.status = BookingStatus.COMPLETED.value
             booking.save()
+
+            EmailService.send_checkout(
+                booking.client.email,
+                {
+                    "room_number": booking.room.number,
+                    "check_out_date": check_in_out.check_out_timestamp,
+                }
+            )
 
             logger.info(f"Booking {booking_id} successfully checked out at {check_in_out.check_out_timestamp}.")
             return CheckOutStatus.COMPLETED
