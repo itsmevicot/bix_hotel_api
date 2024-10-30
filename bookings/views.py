@@ -92,10 +92,13 @@ class BookingListView(APIView):
 
 class BookingDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
-    lookup_url_kwarg = 'booking_id'
     serializer_class = BookingSerializer
 
-    def __init__(self, booking_service: Optional[BookingService] = None, **kwargs):
+    def __init__(
+            self,
+            booking_service: Optional[BookingService] = None,
+            **kwargs
+    ):
         super().__init__(**kwargs)
         self.booking_service = booking_service or BookingService()
 
@@ -108,7 +111,10 @@ class BookingDetailView(RetrieveUpdateDestroyAPIView):
         }
     )
     def get(self, request, booking_id):
-        booking = self.booking_service.get_booking_by_id(booking_id, request.user)
+        booking = self.booking_service.get_booking_by_id(
+            booking_id,
+            request.user
+        )
         serializer = BookingSerializer(booking)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -148,12 +154,20 @@ class BookingDetailView(RetrieveUpdateDestroyAPIView):
         }
     )
     def delete(self, request, booking_id):
-        booking = self.booking_service.cancel_booking(booking_id, request.user)
+        self.booking_service.cancel_booking(booking_id, request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ConfirmBookingView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def __init__(
+            self,
+            booking_service: Optional[BookingService] = None,
+            **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.booking_service = booking_service or BookingService()
 
     @swagger_auto_schema(
         operation_description="Confirm a pending booking.",
@@ -174,6 +188,14 @@ class ConfirmBookingView(APIView):
 
 class CancelBookingView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def __init__(
+            self,
+            booking_service: Optional[BookingService] = None,
+            **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.booking_service = booking_service or BookingService()
 
     @swagger_auto_schema(
         operation_description="Cancel a specific booking.",
