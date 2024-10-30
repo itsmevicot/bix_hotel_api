@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -7,7 +7,7 @@ from bookings.models import Booking
 from rooms.enums import RoomStatus
 from rooms.models import Room
 from bookings.enums import BookingStatus
-from typing import Optional
+from typing import Optional, List
 
 
 class BookingRepository:
@@ -16,8 +16,8 @@ class BookingRepository:
     def create_booking(
             client: User,
             room: Room,
-            check_in_date: datetime,
-            check_out_date: datetime,
+            check_in_date: date,
+            check_out_date: date,
             status: Optional[str] = BookingStatus.CONFIRMED.value
     ) -> Booking:
         return Booking.objects.create(
@@ -50,3 +50,15 @@ class BookingRepository:
         booking.cancelled_at = timezone.now()
         booking.room.save()
         booking.save()
+
+    @staticmethod
+    def get_expiring_pending_bookings(
+            threshold_date: datetime.date
+    ) -> List[Booking]:
+        """
+        Retrieves all pending bookings with a check-in date within the given threshold date.
+        """
+        return Booking.objects.filter(
+            status=BookingStatus.PENDING.value,
+            check_in_date__lte=threshold_date
+        )

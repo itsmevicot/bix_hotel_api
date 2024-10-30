@@ -5,8 +5,8 @@ from rooms.models import RoomStatus
 
 
 class Booking(models.Model):
-    check_in_date = models.DateTimeField()
-    check_out_date = models.DateTimeField()
+    check_in_date = models.DateField()
+    check_out_date = models.DateField()
     status = models.CharField(max_length=20, choices=BookingStatus.choices(), default=BookingStatus.CONFIRMED.value)
     client = models.ForeignKey('users.User', related_name='bookings', on_delete=models.CASCADE)
     room = models.ForeignKey('rooms.Room', related_name='bookings', on_delete=models.CASCADE)

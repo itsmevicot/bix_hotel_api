@@ -20,8 +20,8 @@ class ExceptionMessageBuilder(APIException):
 class RoomNotAvailableException(ExceptionMessageBuilder):
     def __init__(self):
         self.title = "Room not available"
-        self.message = "This room is not available for booking at the moment."
-        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.message = "There are no available rooms for the selected dates."
+        self.status_code = status.HTTP_409_CONFLICT
         self.detail = {"title": self.title, "message": self.message}
 
 

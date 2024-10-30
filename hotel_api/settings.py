@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -78,6 +79,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hotel_api.wsgi.application'
 
+# REST Framework
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
@@ -96,6 +99,17 @@ REST_FRAMEWORK = {
 
 }
 
+# Swagger
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+        }
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -163,21 +177,21 @@ CELERY_WORKER_SEND_TASK_EVENTS = True
 
 # Celery Beat
 
-# CELERY_BEAT_SCHEDULE = {
-#     'sample_beat_schedule': {
-#         'task': '',
-#         'schedule': crontab(hour='18', minute='30'),
-#     },
-# }
+CELERY_BEAT_SCHEDULE = {
+    'expire-pending-bookings': {
+        'task': 'bookings.tasks.expire_pending_bookings',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
 
 # SMTP
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.google.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-# DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.google.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 
 # JWT
@@ -200,7 +214,8 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{asctime} {levelname} {message}",
+            "format": "[{levelname}] at [{asctime}]: {message}",
+            "datefmt": "%d/%m/%Y %H:%M:%S",
             "style": "{",
         },
     },
