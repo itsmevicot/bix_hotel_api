@@ -1,12 +1,14 @@
 from typing import Optional
 
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rooms.serializers import RoomSerializer
 from rooms.services import RoomService
+from utils.custom_permissions import IsAdminUser
+from utils.exceptions import RoomNotAvailableException
 
 
 class RoomListView(APIView):
@@ -73,10 +75,17 @@ class RoomDetailView(APIView):
 
 
 class RoomAvailabilityView(APIView):
-    def __init__(self, room_service: Optional[RoomService] = None, **kwargs):
+    def __init__(
+            self,
+            room_service: Optional[RoomService] = None,
+            **kwargs
+    ):
         super().__init__(**kwargs)
         self.room_service = room_service or RoomService()
 
     def get(self, request, room_id):
-        is_available = self.room_service.check_availability(room_id)
-        return Response({"available": is_available}, status=status.HTTP_200_OK)
+        try:
+            is_available = self.room_service.check_availability(room_id)
+            return Response({"available": is_available}, status=status.HTTP_200_OK)
+        except RoomNotAvailableException as e:
+            return Response({"error": e.message}, status=e.status_code)

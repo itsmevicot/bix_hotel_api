@@ -4,7 +4,7 @@ from rooms.enums import RoomType, RoomStatus
 
 
 class Room(models.Model):
-    number = models.PositiveIntegerField(unique=True)
+    number = models.CharField(max_length=10, unique=True)
     type = models.CharField(max_length=20, choices=RoomType.choices())
     status = models.CharField(max_length=20, choices=RoomStatus.choices(), default=RoomStatus.AVAILABLE.value)
     price = models.DecimalField(max_digits=8, decimal_places=2)

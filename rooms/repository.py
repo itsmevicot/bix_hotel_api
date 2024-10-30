@@ -41,8 +41,8 @@ class RoomRepository:
     @staticmethod
     def create_room(
             number: str,
-            status: str,
-            room_type: str,
+            status: RoomStatus,
+            room_type: RoomType,
             price: float
     ) -> Room:
         return Room.objects.create(
@@ -52,13 +52,14 @@ class RoomRepository:
             price=price
         )
 
-    @staticmethod
     def update_room(
-            room: Room,
+            self,
+            room_id: int,
             **kwargs
     ) -> Room:
-        for key, value in kwargs.items():
-            setattr(room, key, value)
+        room = self.get_room_by_id(room_id)
+        for field, value in kwargs.items():
+            setattr(room, field, value)
         room.save()
         return room
 
