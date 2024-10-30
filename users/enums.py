@@ -4,7 +4,6 @@ from enum import Enum
 class UserRole(Enum):
     CLIENT = 'CLIENT'
     STAFF = 'STAFF'
-    MANAGER = 'MANAGER'
     ADMIN = 'ADMIN'
 
     @classmethod

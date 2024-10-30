@@ -170,7 +170,7 @@ class BookingService:
             if filters.get("room_type"):
                 filter_criteria["room__type"] = filters["room_type"]
 
-            if user.role in [UserRole.MANAGER.value, UserRole.ADMIN.value] and filters.get("client_id"):
+            if user.role in [UserRole.STAFF.value, UserRole.ADMIN.value] and filters.get("client_id"):
                 filter_criteria["client_id"] = filters["client_id"]
 
             return self.booking_repository.get_filtered_bookings(filter_criteria)
