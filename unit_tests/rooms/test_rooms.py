@@ -1,5 +1,4 @@
 from datetime import date
-
 import pytest
 from django.urls import reverse
 from rest_framework import status
@@ -8,8 +7,12 @@ from bookings.enums import BookingStatus
 from bookings.models import Booking
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
+from rooms.serializers import RoomCreateSerializer
 from users.enums import UserRole
 from users.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -17,7 +20,7 @@ def sample_room(db):
     return Room.objects.create(
         number="101",
         status=RoomStatus.AVAILABLE.value,
-        type=RoomType.SINGLE.value,
+        room_type=RoomType.SINGLE.value,
         price=100.00
     )
 
@@ -27,7 +30,7 @@ def available_room(db):
     """Fixture for a room available for booking without any conflicting reservations."""
     return Room.objects.create(
         number="201",
-        type=RoomType.SINGLE.value,
+        room_type=RoomType.SINGLE.value,
         status=RoomStatus.AVAILABLE.value,
         price=100.00
     )
@@ -38,7 +41,7 @@ def room_with_booking(db):
     """Fixture for a room that has a conflicting booking."""
     room = Room.objects.create(
         number="202",
-        type=RoomType.SINGLE.value,
+        room_type=RoomType.SINGLE.value,
         status=RoomStatus.AVAILABLE.value,
         price=120.00
     )
@@ -80,8 +83,8 @@ def test_retrieve_room(auth_api_client, sample_room):
     assert response.status_code == status.HTTP_200_OK
     assert response.data["number"] == str(sample_room.number)
     assert response.data["status"] == sample_room.get_status_display()
-    assert response.data["type"] == sample_room.get_type_display()
-    assert response.data["price"] == "{:.2f}".format(sample_room.price)
+    assert response.data["room_type"] == sample_room.get_room_type_display()
+    assert response.data["price"] == "{:.2f}".format(float(sample_room.price))
 
 
 @pytest.mark.django_db
@@ -108,34 +111,43 @@ def test_check_room_not_available(auth_api_client, sample_room):
 
 @pytest.mark.django_db
 def test_create_room(auth_api_client):
+    Room.objects.filter(number="102").delete()
+
     url = reverse("rooms:room-list")
     data = {
         "number": "102",
         "status": RoomStatus.AVAILABLE.value,
-        "type": RoomType.DOUBLE.value,
-        "price": 150.00
+        "room_type": RoomType.DOUBLE.value,
+        "price": '150.00'
     }
+
+    serializer = RoomCreateSerializer(data=data)
+    assert serializer.is_valid(), f"Serializer validation failed: {serializer.errors}"
+
     response = auth_api_client.post(url, data=data)
 
+    logger.info(f"Response Status: {response.status_code}")
+    logger.info(f"Response Data: {response.data}")
+
     assert response.status_code == status.HTTP_201_CREATED
-    assert Room.objects.filter(number="102").exists()
-    assert response.data["number"] == str(data["number"])
-    assert response.data["status"] == RoomStatus(data["status"]).name.capitalize()
-    assert response.data["type"] == RoomType(data["type"]).name.capitalize()
-    assert response.data["price"] == "{:.2f}".format(data["price"])
+    created_room = Room.objects.get(number="102")
+    assert created_room.number == data["number"]
+    assert created_room.status == data["status"]
+    assert created_room.room_type == data["room_type"]
+    assert "{:.2f}".format(float(created_room.price)) == data["price"]
 
 
 @pytest.mark.django_db
 def test_update_room(auth_api_client, sample_room):
     url = reverse("rooms:room-detail", args=[sample_room.id])
     data = {
-        "number": "101",
+        "number": "105",
         "status": RoomStatus.OCCUPIED.value,
-        "type": RoomType.SUITE.value,
+        "room_type": RoomType.SUITE.value,
         "price": "200.00"
     }
-    response = auth_api_client.put(url, data=data)
 
+    response = auth_api_client.put(url, data=data)
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -146,7 +158,7 @@ def test_room_availability_with_valid_dates_and_type(auth_api_client, available_
     params = {
         "check_in_date": "10/11/2024",
         "check_out_date": "15/11/2024",
-        "type": RoomType.SINGLE.value,
+        "room_type": RoomType.SINGLE.value,
         "price": "120.00"
     }
     response = auth_api_client.get(url, params)
@@ -159,7 +171,7 @@ def test_room_availability_with_valid_dates_and_type(auth_api_client, available_
 @pytest.mark.django_db
 def test_room_availability_with_missing_dates(auth_api_client):
     url = reverse("rooms:room-availability-filter")
-    response = auth_api_client.get(url, {"type": RoomType.SINGLE.value, "price": "120.00"})
+    response = auth_api_client.get(url, {"room_type": RoomType.SINGLE.value, "price": "120.00"})
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "check_in_date" in response.data
@@ -182,7 +194,7 @@ def test_room_availability_check_out_before_check_in(auth_api_client):
     response = auth_api_client.get(url, {
         "check_in_date": "15/11/2024",
         "check_out_date": "10/11/2024",
-        "type": RoomType.SINGLE.value
+        "room_type": RoomType.SINGLE.value
     })
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -193,12 +205,12 @@ def test_room_availability_check_out_before_check_in(auth_api_client):
 @pytest.mark.django_db
 def test_no_rooms_available_for_criteria(auth_api_client):
     url = reverse("rooms:room-availability-filter")
-    Room.objects.create(number="301", type=RoomType.SINGLE.value, status=RoomStatus.BOOKED.value, price=100.00)
+    Room.objects.create(number="301", room_type=RoomType.SINGLE.value, status=RoomStatus.BOOKED.value, price=100.00)
 
     params = {
         "check_in_date": "10/11/2024",
         "check_out_date": "15/11/2024",
-        "type": RoomType.SINGLE.value,
+        "room_type": RoomType.SINGLE.value,
         "price": "80.00"
     }
     response = auth_api_client.get(url, params)
@@ -210,13 +222,13 @@ def test_no_rooms_available_for_criteria(auth_api_client):
 @pytest.mark.django_db
 def test_room_availability_with_price_filter(auth_api_client):
     url = reverse("rooms:room-availability-filter")
-    Room.objects.create(number="401", type=RoomType.SINGLE.value, status=RoomStatus.AVAILABLE.value, price=100.00)
-    Room.objects.create(number="402", type=RoomType.SINGLE.value, status=RoomStatus.AVAILABLE.value, price=150.00)
+    Room.objects.create(number="401", room_type=RoomType.SINGLE.value, status=RoomStatus.AVAILABLE.value, price=100.00)
+    Room.objects.create(number="402", room_type=RoomType.SINGLE.value, status=RoomStatus.AVAILABLE.value, price=150.00)
 
     params = {
         "check_in_date": "10/11/2024",
         "check_out_date": "15/11/2024",
-        "type": RoomType.SINGLE.value,
+        "room_type": RoomType.SINGLE.value,
         "price": "120.00"
     }
     response = auth_api_client.get(url, params)

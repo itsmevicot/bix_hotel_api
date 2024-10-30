@@ -1,8 +1,11 @@
 import logging
+import traceback
 from datetime import date
 from decimal import Decimal
 from typing import Optional, List
-from django.db import transaction
+
+from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
 from django.db.models import QuerySet
 
 from rooms.enums import RoomStatus, RoomType
@@ -152,7 +155,6 @@ class RoomService:
         logger.debug(f"Parameters received - Room Type: {room_type}, Max Price: {price}, "
                      f"Check-in Date: {check_in_date}, Check-out Date: {check_out_date}")
 
-        # Validate required parameters
         if not check_in_date or not check_out_date:
             logger.error("check_in_date or check_out_date missing.")
             raise ValueError("Both check_in_date and check_out_date must be provided.")

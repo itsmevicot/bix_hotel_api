@@ -4,20 +4,50 @@ from rooms.enums import RoomType
 from rooms.models import Room
 
 
-class RoomSerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source='get_type_display')
+class RoomCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ['number', 'status', 'room_type', 'price']
+
+
+class RoomUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ['number', 'status', 'room_type', 'price']
+
+
+class RoomListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing rooms without sensitive/internal fields.
+    """
+    room_type = serializers.CharField(source='get_room_type_display')
     status = serializers.CharField(source='get_status_display')
 
     class Meta:
         model = Room
-        fields = ['id', 'number', 'type', 'status', 'price', 'updated_at']
+        fields = ['number', 'room_type', 'status', 'price']
+
+
+class RoomDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for detailed room information, used for retrieving a single room.
+    """
+    room_type = serializers.CharField(source='get_room_type_display')
+    status = serializers.CharField(source='get_status_display')
+
+    class Meta:
+        model = Room
+        fields = ['id', 'number', 'room_type', 'status', 'price', 'updated_at']
         read_only_fields = ['id', 'status', 'updated_at']
 
 
 class RoomAvailabilityFilterSerializer(serializers.Serializer):
+    """
+    Serializer for validating the input filters for checking room availability.
+    """
     check_in_date = serializers.DateField(required=True, input_formats=['%d/%m/%Y'])
     check_out_date = serializers.DateField(required=True, input_formats=['%d/%m/%Y'])
-    type = serializers.ChoiceField(choices=RoomType.choices(), required=False)
+    room_type = serializers.ChoiceField(choices=RoomType.choices(), required=False)
     price = serializers.DecimalField(max_digits=8, decimal_places=2, required=False)
 
     def validate(self, data):

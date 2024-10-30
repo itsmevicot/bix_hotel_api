@@ -55,7 +55,7 @@ def mock_room(db):
     return Room.objects.create(
         number="101",
         status=RoomStatus.AVAILABLE.value,
-        type=RoomType.SINGLE.value,
+        room_type=RoomType.SINGLE.value,
         price=100.0
     )
 

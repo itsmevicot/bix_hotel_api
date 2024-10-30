@@ -3,12 +3,13 @@ from rest_framework import serializers
 from bookings.enums import BookingStatus
 from bookings.models import Booking
 from rooms.enums import RoomType
-from rooms.serializers import RoomSerializer
+from rooms.serializers import RoomListSerializer
+
 from users.serializers import UserSerializer
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    room = RoomSerializer(read_only=True)
+    room = RoomListSerializer(read_only=True)
     client = UserSerializer(read_only=True)
 
     class Meta:

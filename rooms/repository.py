@@ -55,7 +55,7 @@ class RoomRepository:
         return Room.objects.create(
             number=number,
             status=status,
-            type=room_type,
+            room_type=room_type,
             price=price
         )
 
