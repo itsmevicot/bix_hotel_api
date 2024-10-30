@@ -1,68 +1,142 @@
 [
-    {
-        "model": "authentication.user",
-        "pk": 1,
-        "fields": {
-            "username": "client1",
-            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
-            "email": "client1@example.com",
-            "role": "client",
-            "is_active": true
-        }
-    },
-    {
-        "model": "authentication.user",
-        "pk": 2,
-        "fields": {
-            "username": "client2",
-            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
-            "email": "client2@example.com",
-            "role": "client",
-            "is_active": true
-        }
-    },
-    {
-        "model": "authentication.user",
-        "pk": 3,
-        "fields": {
-            "username": "client3",
-            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
-            "email": "client3@example.com",
-            "role": "client",
-            "is_active": true
-        }
-    },
-    {
-        "model": "authentication.user",
-        "pk": 4,
-        "fields": {
-            "username": "client4",
-            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
-            "email": "client4@example.com",
-            "role": "client",
-            "is_active": true
-        }
-    },
-    {
-        "model": "authentication.user",
-        "pk": 5,
-        "fields": {
-            "username": "client5",
-            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
-            "email": "client5@example.com",
-            "role": "client",
-            "is_active": true
-        }
-    },
-    {
-        "model": "authentication.user",
-        "pk": 6,
-        "fields": {
-            "username": "client6",
-            "password": "pbkdf2_sha256$260000$K9UtnqGu7N7i$p2bB07Zh79xzZtsV9cZBc2+M7BvFbFv5IUdSgzIGgnA=",
-            "email": "client6@example.com",
-            "role": "client",
-            "is_active": true
-        }
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "name": "Admin User",
+      "email": "admin@example.com",
+      "cpf": "12345678909",
+      "birth_date": "1980-01-01",
+      "role": "ADMIN",
+      "is_active": true,
+      "is_staff": true,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
     }
+  },
+  {
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+      "name": "Manager User",
+      "email": "manager@example.com",
+      "cpf": "12345678901",
+      "birth_date": "1985-05-15",
+      "role": "STAFF",
+      "is_active": true,
+      "is_staff": true,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+      "name": "Client User 1",
+      "email": "client1@example.com",
+      "cpf": "12345678902",
+      "birth_date": "1990-03-10",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "name": "Client User 2",
+      "email": "client2@example.com",
+      "cpf": "12345678903",
+      "birth_date": "1991-06-20",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+      "name": "Client User 3",
+      "email": "client3@example.com",
+      "cpf": "12345678904",
+      "birth_date": "1988-09-25",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 6,
+    "fields": {
+      "name": "Client User 4",
+      "email": "client4@example.com",
+      "cpf": "12345678905",
+      "birth_date": "1992-12-30",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 7,
+    "fields": {
+      "name": "Client User 5",
+      "email": "client5@example.com",
+      "cpf": "12345678906",
+      "birth_date": "1985-04-18",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 8,
+    "fields": {
+      "name": "Client User 6",
+      "email": "client6@example.com",
+      "cpf": "12345678907",
+      "birth_date": "1994-07-11",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 9,
+    "fields": {
+      "name": "Client User 7",
+      "email": "client7@example.com",
+      "cpf": "12345678908",
+      "birth_date": "1989-11-08",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 10,
+    "fields": {
+      "name": "Client User 8",
+      "email": "client8@example.com",
+      "cpf": "12345678910",
+      "birth_date": "1993-08-17",
+      "role": "CLIENT",
+      "is_active": true,
+      "is_staff": false,
+      "password": "pbkdf2_sha256$260000$AbcDef123$ZoU4PP7s9j5HfF9FVu6YVlfWUP1Hlgr5BzT7CmtBSOg="
+    }
+  }
 ]

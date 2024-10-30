@@ -1,0 +1,112 @@
+[
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 1,
+    "fields": {
+      "booking": 1,
+      "check_in_timestamp": "2024-11-01T15:00:00Z",
+      "check_out_timestamp": "2024-11-05T11:00:00Z",
+      "check_in_status": "COMPLETED",
+      "check_out_status": "COMPLETED"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 2,
+    "fields": {
+      "booking": 2,
+      "check_in_timestamp": "2024-11-03T14:00:00Z",
+      "check_out_timestamp": "2024-11-07T10:00:00Z",
+      "check_in_status": "COMPLETED",
+      "check_out_status": "PENDING"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 3,
+    "fields": {
+      "booking": 3,
+      "check_in_timestamp": "2024-11-10T16:00:00Z",
+      "check_out_timestamp": null,
+      "check_in_status": "PENDING",
+      "check_out_status": "PENDING"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 4,
+    "fields": {
+      "booking": 4,
+      "check_in_timestamp": null,
+      "check_out_timestamp": null,
+      "check_in_status": "PENDING",
+      "check_out_status": "PENDING"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 5,
+    "fields": {
+      "booking": 5,
+      "check_in_timestamp": "2024-11-08T12:00:00Z",
+      "check_out_timestamp": "2024-11-12T11:00:00Z",
+      "check_in_status": "COMPLETED",
+      "check_out_status": "COMPLETED"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 6,
+    "fields": {
+      "booking": 6,
+      "check_in_timestamp": "2024-11-14T15:00:00Z",
+      "check_out_timestamp": "2024-11-16T10:00:00Z",
+      "check_in_status": "COMPLETED",
+      "check_out_status": "COMPLETED"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 7,
+    "fields": {
+      "booking": 7,
+      "check_in_timestamp": "2024-11-21T15:00:00Z",
+      "check_out_timestamp": null,
+      "check_in_status": "PENDING",
+      "check_out_status": "PENDING"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 8,
+    "fields": {
+      "booking": 8,
+      "check_in_timestamp": "2024-11-22T14:00:00Z",
+      "check_out_timestamp": null,
+      "check_in_status": "PENDING",
+      "check_out_status": "PENDING"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 9,
+    "fields": {
+      "booking": 9,
+      "check_in_timestamp": "2024-11-24T15:00:00Z",
+      "check_out_timestamp": null,
+      "check_in_status": "PENDING",
+      "check_out_status": "PENDING"
+    }
+  },
+  {
+    "model": "checkins.checkincheckout",
+    "pk": 10,
+    "fields": {
+      "booking": 10,
+      "check_in_timestamp": "2024-11-27T15:00:00Z",
+      "check_out_timestamp": "2024-11-30T11:00:00Z",
+      "check_in_status": "CANCELED",
+      "check_out_status": "CANCELED"
+    }
+  }
+]
