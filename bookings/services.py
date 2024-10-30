@@ -1,10 +1,13 @@
 import logging
 from datetime import date
+from typing import Optional
+
 from django.db import transaction
 
 from bookings.enums import BookingStatus
 from bookings.models import Booking
 from bookings.repository import BookingRepository
+from checkins.repository import CheckInCheckOutRepository
 from rooms.enums import RoomStatus, RoomType
 from rooms.repository import RoomRepository
 from users.enums import UserRole
@@ -19,11 +22,13 @@ logger = logging.getLogger(__name__)
 class BookingService:
     def __init__(
             self,
-            booking_repository=None,
-            room_repository=None
+            booking_repository: Optional[BookingRepository] = None,
+            room_repository: Optional[RoomRepository] = None,
+            check_in_out_repository: Optional[CheckInCheckOutRepository] = None
     ):
         self.booking_repository = booking_repository or BookingRepository()
         self.room_repository = room_repository or RoomRepository()
+        self.check_in_out_repository = check_in_out_repository or CheckInCheckOutRepository()
 
     def create_booking(
             self,
@@ -94,14 +99,17 @@ class BookingService:
             logger.error("Modification failed: room unavailable for new dates")
             raise
         except InvalidBookingModificationException as e:
-            logger.error("Invalid modification: Booking %s status is not confirmed", booking_id)
+            logger.error(f"Invalid modification: Booking {booking_id} status is not confirmed")
             raise
         except Exception as e:
-            logger.exception("Failed to modify booking %s", booking_id)
+            logger.exception(f"Failed to modify booking {booking_id}")
             raise e
 
     @transaction.atomic
-    def confirm_booking(self, booking: Booking) -> Booking:
+    def confirm_booking(
+            self,
+            booking: Booking
+    ) -> Booking:
         try:
             if booking.status != BookingStatus.PENDING.value:
                 logger.error("Only pending bookings can be confirmed.")
@@ -110,19 +118,21 @@ class BookingService:
             booking.status = BookingStatus.CONFIRMED.value
             booking.save()
 
+            self.check_in_out_repository.create_check_in_out(booking)
+
             EmailService.send_booking_confirmation(booking.client.email, {
                 "room_number": booking.room.number,
                 "check_in_date": booking.check_in_date
             })
 
-            logger.info("Booking %s confirmed for client %s", booking.id, booking.client.id)
+            logger.info(f"Booking {booking.id} confirmed and CheckInCheckOut created for client {booking.client.id}")
             return booking
 
         except InvalidBookingConfirmationException as e:
-            logger.error("Cannot confirm booking: %s", e)
+            logger.error(f"Cannot confirm booking: {e}")
             raise
         except Exception as e:
-            logger.exception("Failed to confirm booking %s", booking.id)
+            logger.exception(f"Failed to confirm booking {booking.id}")
             raise e
 
     @transaction.atomic
@@ -141,7 +151,7 @@ class BookingService:
                 "check_in_date": booking.check_in_date
             })
 
-            logger.info("Booking %s canceled for client %s", booking.id, booking.client.id)
+            logger.info(f"Booking {booking.id} canceled for client {booking.client.id}")
             return booking
 
         except Exception as e:
@@ -176,7 +186,7 @@ class BookingService:
             return self.booking_repository.get_filtered_bookings(filter_criteria)
 
         except Exception as e:
-            logger.exception("Failed to retrieve filtered bookings with filters: %s", filters)
+            logger.exception(f"Failed to retrieve filtered bookings with filters: {filters}")
             raise e
 
     def get_booking_by_id(

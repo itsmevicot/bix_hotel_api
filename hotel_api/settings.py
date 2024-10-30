@@ -184,6 +184,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'bookings.tasks.expire_pending_bookings',
         'schedule': crontab(hour=0, minute=0),
     },
+    'manage-room-availability-hourly': {
+        'task': 'path.to.manage_room_availability',
+        'schedule': crontab(minute=0, hour='*'),
+    },
 }
 
 # SMTP

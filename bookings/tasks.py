@@ -97,3 +97,20 @@ def send_booking_modification_email(
         logger.info(f"Booking modification email sent to {client_email} for room {booking_details['room_number']}.")
     except Exception as e:
         logger.error(f"Failed to send booking modification email to {client_email}: {e}")
+
+
+@shared_task
+def manage_room_availability():
+    now = timezone.now()
+    no_show_threshold = now - timedelta(hours=24)
+    booking_repository = BookingRepository()
+
+    no_show_bookings = booking_repository.get_no_show_bookings(no_show_threshold)
+    for booking in no_show_bookings:
+        booking_repository.mark_booking_as_no_show(booking)
+        logger.info(f"Booking {booking.id} marked as NO_SHOW and room {booking.room.id} set to AVAILABLE.")
+
+    completed_checkouts = booking_repository.get_completed_checkouts(now)
+    for booking in completed_checkouts:
+        booking_repository.free_up_room(booking)
+        logger.info(f"Room {booking.room.id} freed up after booking {booking.id} checkout.")

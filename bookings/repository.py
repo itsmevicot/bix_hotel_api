@@ -2,6 +2,8 @@ from datetime import datetime, date
 
 from django.db.models import QuerySet
 from django.utils import timezone
+
+from checkins.enums import CheckInStatus
 from users.models import User
 from bookings.models import Booking
 from rooms.enums import RoomStatus
@@ -88,8 +90,41 @@ class BookingRepository:
         return queryset
 
     @staticmethod
-    def update_booking(booking: Booking) -> None:
+    def get_no_show_bookings(no_show_threshold: datetime) -> List[Booking]:
         """
-        Saves the current state of the Booking instance to the database.
+        Retrieves bookings that are confirmed, have passed the check-in date by 24 hours,
+        and have not completed check-in.
         """
+        return Booking.objects.filter(
+            status=BookingStatus.CONFIRMED.value,
+            check_in_date__lte=no_show_threshold,
+            check_in_check_out__check_in_status=CheckInStatus.PENDING.value
+        )
+
+    @staticmethod
+    def mark_booking_as_no_show(booking: Booking) -> None:
+        """
+        Marks a booking as 'NO_SHOW' and frees up the associated room.
+        """
+        booking.status = BookingStatus.NO_SHOW.value
+        booking.room.status = RoomStatus.AVAILABLE.value
+        booking.room.save()
         booking.save()
+
+    @staticmethod
+    def get_completed_checkouts(current_time: datetime) -> List[Booking]:
+        """
+        Retrieves bookings that are completed and have a past checkout timestamp.
+        """
+        return Booking.objects.filter(
+            status=BookingStatus.COMPLETED.value,
+            check_in_check_out__check_out_timestamp__lte=current_time
+        )
+
+    @staticmethod
+    def free_up_room(booking: Booking) -> None:
+        """
+        Frees up the room by setting its status to AVAILABLE.
+        """
+        booking.room.status = RoomStatus.AVAILABLE.value
+        booking.room.save()
