@@ -71,7 +71,7 @@ class BookingService:
             if booking.status != BookingStatus.CONFIRMED.value:
                 raise InvalidBookingModificationException()
 
-            if not self.room_repository.is_room_available(
+            if not self.booking_repository.is_room_available(
                     booking.room.id, new_check_in_date, new_check_out_date
             ):
                 raise RoomNotAvailableException()
