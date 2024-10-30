@@ -39,6 +39,6 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('bookings/', include('bookings.urls')),
     path('rooms/', include('rooms.urls')),
-    path('checkins/', include('checkins.urls')),
+    path('', include('checkins.urls')),
     path('', include('authentication.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
