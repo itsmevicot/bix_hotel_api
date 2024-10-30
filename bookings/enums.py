@@ -6,6 +6,7 @@ class BookingStatus(Enum):
     CANCELLED = "CANCELLED"
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
+    NO_SHOW = "NO_SHOW"
 
     @classmethod
     def choices(cls):

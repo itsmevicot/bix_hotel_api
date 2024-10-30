@@ -86,3 +86,10 @@ class BookingRepository:
         """
         queryset = Booking.objects.filter(**filter_criteria)
         return queryset
+
+    @staticmethod
+    def update_booking(booking: Booking) -> None:
+        """
+        Saves the current state of the Booking instance to the database.
+        """
+        booking.save()

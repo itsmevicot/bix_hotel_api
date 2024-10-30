@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'users',
     'bookings',
     'rooms',
+    'utils',
+    'checkins',
     'rest_framework',
     'drf_yasg',
 ]

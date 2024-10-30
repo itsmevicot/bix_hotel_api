@@ -55,3 +55,27 @@ class InvalidBookingConfirmationException(ExceptionMessageBuilder):
         self.message = "Only pending bookings can be confirmed."
         self.status_code = status.HTTP_400_BAD_REQUEST
         self.detail = {"title": self.title, "message": self.message}
+
+
+class InvalidBookingStatusException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Invalid Booking Status"
+        self.message = "The booking status does not allow this action."
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = {"title": self.title, "message": self.message}
+
+
+class AlreadyCheckedInException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Already Checked-In"
+        self.message = "This booking has already been checked in."
+        self.status_code = status.HTTP_409_CONFLICT
+        self.detail = {"title": self.title, "message": self.message}
+
+
+class AlreadyCheckedOutException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Already Checked-Out"
+        self.message = "This booking has already been checked out."
+        self.status_code = status.HTTP_409_CONFLICT
+        self.detail = {"title": self.title, "message": self.message}
