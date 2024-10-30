@@ -1,7 +1,9 @@
 import logging
+from datetime import date
 from decimal import Decimal
 from typing import Optional, List
 from django.db import transaction
+from django.db.models import QuerySet
 
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
@@ -135,3 +137,44 @@ class RoomService:
         except Exception as e:
             logger.error(f"Error checking room availability: {e}")
             raise
+
+    def get_available_rooms(
+            self,
+            room_type: Optional[RoomType] = None,
+            price: Optional[float] = None,
+            check_in_date: date = None,
+            check_out_date: date = None
+    ) -> QuerySet[Room]:
+        """
+        Filters available rooms based on room type, price, and availability within a specified date range.
+        """
+        logger.info("Starting to fetch available rooms.")
+        logger.debug(f"Parameters received - Room Type: {room_type}, Max Price: {price}, "
+                     f"Check-in Date: {check_in_date}, Check-out Date: {check_out_date}")
+
+        # Validate required parameters
+        if not check_in_date or not check_out_date:
+            logger.error("check_in_date or check_out_date missing.")
+            raise ValueError("Both check_in_date and check_out_date must be provided.")
+
+        filters = {}
+        if room_type:
+            filters["type"] = room_type
+        if price is not None:
+            filters["price__lte"] = price
+
+        try:
+            available_rooms = self.room_repository.get_available_rooms(
+                room_type=filters.get("type"),
+                price=filters.get("price__lte"),
+                check_in_date=check_in_date,
+                check_out_date=check_out_date
+            )
+            logger.debug(f"Rooms filtered based on criteria: {available_rooms.count()} rooms found.")
+
+        except Exception as e:
+            logger.error(f"Error fetching available rooms: {e}")
+            raise
+
+        logger.info("Successfully fetched available rooms.")
+        return available_rooms

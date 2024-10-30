@@ -1,3 +1,10 @@
+from datetime import date
+from typing import Optional
+
+from django.db.models import QuerySet
+
+from bookings.enums import BookingStatus
+from bookings.models import Booking
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
 from utils.exceptions import RoomNotAvailableException
@@ -68,3 +75,30 @@ class RoomRepository:
             room: Room
     ) -> None:
         room.delete()
+
+    @staticmethod
+    def get_available_rooms(
+            room_type: Optional[RoomType],
+            price: Optional[float],
+            check_in_date: date,
+            check_out_date: date
+    ) -> QuerySet[Room]:
+        """
+        Retrieve rooms of a specific type and price that are available within the given date range.
+        """
+
+        room_filters = {"status": RoomStatus.AVAILABLE.value}
+        if room_type:
+            room_filters["type"] = room_type
+        if price is not None:
+            room_filters["price__lte"] = price
+
+        unavailable_rooms = Booking.objects.filter(
+            status=BookingStatus.CONFIRMED.value,
+            check_in_date__lt=check_out_date,
+            check_out_date__gt=check_in_date
+        ).values_list('room_id', flat=True)
+
+        available_rooms = Room.objects.filter(**room_filters).exclude(id__in=unavailable_rooms)
+
+        return available_rooms
