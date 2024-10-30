@@ -55,9 +55,6 @@ class BookingRepository:
     def get_expiring_pending_bookings(
             threshold_date: datetime.date
     ) -> List[Booking]:
-        """
-        Retrieves all pending bookings with a check-in date within the given threshold date.
-        """
         return Booking.objects.filter(
             status=BookingStatus.PENDING.value,
             check_in_date__lte=threshold_date
