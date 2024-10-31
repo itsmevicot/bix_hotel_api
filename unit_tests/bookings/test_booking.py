@@ -10,8 +10,7 @@ from django.utils import timezone
 from bookings.enums import BookingStatus
 from bookings.models import Booking
 from bookings.services import BookingService
-from bookings.tasks import send_booking_creation_email, send_booking_confirmation_email, expire_pending_bookings, \
-    manage_room_availability
+from bookings.tasks import send_booking_creation_email, send_booking_confirmation_email, manage_room_availability
 from checkins.models import CheckInCheckOut
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
