@@ -128,3 +128,19 @@ class BookingRepository:
         """
         booking.room.status = RoomStatus.AVAILABLE.value
         booking.room.save()
+
+    @staticmethod
+    def is_room_available_excluding_booking(
+            room_id: int,
+            check_in_date: date,
+            check_out_date: date,
+            exclude_booking_id: int
+    ) -> bool:
+        conflicting_bookings = Booking.objects.filter(
+            room_id=room_id,
+            status=BookingStatus.CONFIRMED.value,
+            check_in_date__lt=check_out_date,
+            check_out_date__gt=check_in_date,
+        ).exclude(id=exclude_booking_id)
+
+        return not conflicting_bookings.exists()

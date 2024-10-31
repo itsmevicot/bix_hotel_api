@@ -78,21 +78,28 @@ class BookingService:
         try:
             booking = self.booking_repository.get_booking_by_id(booking_id)
 
-            if booking.status != BookingStatus.CONFIRMED.value:
+            if booking.status != BookingStatus.PENDING.value:
                 raise InvalidBookingModificationException()
 
             original_room_number = booking.room.number
             original_check_in_date = booking.check_in_date
             original_check_out_date = booking.check_out_date
+            original_room_price = booking.room.price
 
             if booking.room.room_type != room_type:
                 new_room = self.room_repository.get_available_room(room_type=room_type)
                 if not new_room:
                     raise RoomNotAvailableException()
-                booking.room = new_room
 
-            if not self.booking_repository.is_room_available(
-                    booking.room.id, new_check_in_date, new_check_out_date
+                booking.room.status = RoomStatus.AVAILABLE.value
+                booking.room.save()
+
+                booking.room = new_room
+                booking.room.status = RoomStatus.BOOKED.value
+                booking.room.save()
+
+            if not self.booking_repository.is_room_available_excluding_booking(
+                    booking.room.id, new_check_in_date, new_check_out_date, exclude_booking_id=booking_id
             ):
                 raise RoomNotAvailableException()
 
@@ -106,9 +113,11 @@ class BookingService:
                     "room_number_before": original_room_number,
                     "check_in_date_before": original_check_in_date,
                     "check_out_date_before": original_check_out_date,
+                    "room_price_before": original_room_price,
                     "room_number_after": booking.room.number,
                     "check_in_date_after": new_check_in_date,
                     "check_out_date_after": new_check_out_date,
+                    "room_price_after": booking.room.price,
                 }
             )
             return booking
@@ -117,7 +126,7 @@ class BookingService:
             logger.error("Modification failed: room unavailable for new dates")
             raise
         except InvalidBookingModificationException:
-            logger.error(f"Invalid modification: Booking {booking_id} status is not confirmed")
+            logger.error(f"Invalid modification: Booking {booking_id} status is not pending")
             raise
         except Exception as e:
             logger.exception(f"Failed to modify booking {booking_id}")

@@ -52,7 +52,7 @@ class UnauthorizedCancellationException(ExceptionMessageBuilder):
 class InvalidBookingModificationException(ExceptionMessageBuilder):
     def __init__(self):
         self.title = "Invalid Booking Modification"
-        self.message = "Only confirmed bookings can be modified."
+        self.message = "Only non-confirmed bookings can be modified."
         self.status_code = status.HTTP_400_BAD_REQUEST
         self.detail = {"title": self.title, "message": self.message}
 

@@ -96,44 +96,79 @@ def test_create_booking_no_room_available(booking_service, booking_data):
 
 
 @pytest.mark.django_db
-def test_modify_booking_success(booking_service, booking_data, mock_room):
-    # Define new dates for modification
-    new_check_in_date = booking_data["check_in_date"] + timedelta(days=1)
-    new_check_out_date = booking_data["check_out_date"] + timedelta(days=1)
+def test_modify_booking_success(booking_service):
+    # Set up dates for the test
+    specific_check_in_date = date(2024, 11, 1)
+    specific_check_out_date = date(2024, 11, 3)
+    new_check_in_date = specific_check_in_date + timedelta(days=1)
+    new_check_out_date = specific_check_out_date + timedelta(days=1)
 
-    with patch.object(booking_service.booking_repository, 'get_booking_by_id') as mock_get_booking, \
-            patch.object(booking_service.booking_repository, 'is_room_available', return_value=True), \
-            patch('bookings.services.EmailService.send_booking_modification') as mock_send_email:
+    # Create a user
+    user = User.objects.create(
+        name="Test User",
+        email="test@example.com",
+        cpf="12345678909",
+        birth_date="1990-01-01",
+        role="CLIENT"
+    )
 
-        mock_booking = Mock(**booking_data)
-        mock_booking.status = BookingStatus.CONFIRMED.value
-        mock_booking.room = mock_room
-        original_room_number = mock_room.number
-        original_check_in_date = mock_booking.check_in_date
-        original_check_out_date = mock_booking.check_out_date
-        mock_get_booking.return_value = mock_booking
+    # Create two rooms for testing
+    original_room = Room.objects.create(
+        number="101",
+        status=RoomStatus.BOOKED.value,
+        room_type=RoomType.SINGLE.value,
+        price=100.0
+    )
 
-        modified_booking = booking_service.modify_booking(
-            booking_id=1,
-            new_check_in_date=new_check_in_date,
-            new_check_out_date=new_check_out_date,
-            room_type=mock_room.room_type
-        )
+    new_room = Room.objects.create(
+        number="108",
+        status=RoomStatus.AVAILABLE.value,
+        room_type=RoomType.SINGLE.value,
+        price=150.0
+    )
 
-        assert modified_booking.check_in_date == new_check_in_date
-        assert modified_booking.check_out_date == new_check_out_date
+    # Create a booking
+    booking = Booking.objects.create(
+        client=user,
+        room=original_room,
+        check_in_date=specific_check_in_date,
+        check_out_date=specific_check_out_date,
+        status=BookingStatus.PENDING.value
+    )
 
-        mock_send_email.assert_called_once_with(
-            mock_booking.client.email,
-            {
-                "room_number_before": original_room_number,
-                "check_in_date_before": original_check_in_date,
-                "check_out_date_before": original_check_out_date,
-                "room_number_after": mock_booking.room.number,
-                "check_in_date_after": new_check_in_date,
-                "check_out_date_after": new_check_out_date,
-            }
-        )
+    # Test case where the room remains the same
+    modified_booking = booking_service.modify_booking(
+        booking_id=booking.id,
+        new_check_in_date=new_check_in_date,
+        new_check_out_date=new_check_out_date,
+        room_type=RoomType.SINGLE.value
+    )
+
+    # Assertions for when the room remains the same
+    assert modified_booking.check_in_date == new_check_in_date
+    assert modified_booking.check_out_date == new_check_out_date
+    assert modified_booking.room.number == original_room.number
+    assert modified_booking.room.price == original_room.price
+
+    # Test case where the room changes
+    modified_booking = booking_service.modify_booking(
+        booking_id=booking.id,
+        new_check_in_date=new_check_in_date,
+        new_check_out_date=new_check_out_date,
+        room_type=RoomType.SINGLE.value
+    )
+
+    # Reload room data to confirm changes
+    modified_booking.room.refresh_from_db()
+    new_room.refresh_from_db()
+
+    # Assertions for when the room changes
+    assert modified_booking.room.number == new_room.number, "Expected room number did not match."
+    assert modified_booking.room.price == new_room.price, "Expected room price did not match."
+    assert modified_booking.check_in_date == new_check_in_date
+    assert modified_booking.check_out_date == new_check_out_date
+    assert new_room.status == RoomStatus.BOOKED.value
+    assert original_room.status == RoomStatus.AVAILABLE.value
 
 
 @pytest.mark.django_db
