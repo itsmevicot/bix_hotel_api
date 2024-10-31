@@ -24,6 +24,7 @@ class BookingSerializer(serializers.ModelSerializer):
 class BookingCreateSerializer(serializers.Serializer):
     check_in_date = serializers.DateField(input_formats=DATE_INPUT_FORMATS)
     check_out_date = serializers.DateField(input_formats=DATE_INPUT_FORMATS)
+    room_type = serializers.ChoiceField(choices=RoomType.choices(), required=True)
 
     def validate(self, data):
         check_in_date = data.get('check_in_date')
@@ -34,7 +35,6 @@ class BookingCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Check-in date must be in the future.")
         if check_out_date <= today:
             raise serializers.ValidationError("Check-out date must be in the future.")
-
         if check_in_date >= check_out_date:
             raise serializers.ValidationError("Check-out date must be after check-in date.")
 

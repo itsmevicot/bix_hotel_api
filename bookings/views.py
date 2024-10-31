@@ -64,12 +64,14 @@ class BookingListView(APIView):
             client = request.user
             check_in_date = serializer.validated_data['check_in_date']
             check_out_date = serializer.validated_data['check_out_date']
+            room_type = serializer.validated_data['room_type']
 
             try:
                 booking = self.booking_service.create_booking(
                     client=client,
                     check_in_date=check_in_date,
-                    check_out_date=check_out_date
+                    check_out_date=check_out_date,
+                    room_type=room_type
                 )
                 return Response({
                     "status": "success",

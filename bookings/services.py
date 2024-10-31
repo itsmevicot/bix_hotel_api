@@ -51,6 +51,9 @@ class BookingService:
                 status=BookingStatus.PENDING.value
             )
 
+            room.status = RoomStatus.BOOKED.value
+            room.save()
+
             EmailService.send_booking_creation(client.email, {
                 "room_number": room.number,
                 "check_in_date": check_in_date,
