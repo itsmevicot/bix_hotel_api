@@ -72,13 +72,24 @@ class BookingService:
             self,
             booking_id: int,
             new_check_in_date: date,
-            new_check_out_date: date
+            new_check_out_date: date,
+            room_type: RoomType
     ) -> Booking:
         try:
             booking = self.booking_repository.get_booking_by_id(booking_id)
 
             if booking.status != BookingStatus.CONFIRMED.value:
                 raise InvalidBookingModificationException()
+
+            original_room_number = booking.room.number
+            original_check_in_date = booking.check_in_date
+            original_check_out_date = booking.check_out_date
+
+            if booking.room.room_type != room_type:
+                new_room = self.room_repository.get_available_room(room_type=room_type)
+                if not new_room:
+                    raise RoomNotAvailableException()
+                booking.room = new_room
 
             if not self.booking_repository.is_room_available(
                     booking.room.id, new_check_in_date, new_check_out_date
@@ -92,17 +103,20 @@ class BookingService:
             EmailService.send_booking_modification(
                 booking.client.email,
                 {
-                    "room_number": booking.room.number,
-                    "new_check_in_date": new_check_in_date,
-                    "new_check_out_date": new_check_out_date
+                    "room_number_before": original_room_number,
+                    "check_in_date_before": original_check_in_date,
+                    "check_out_date_before": original_check_out_date,
+                    "room_number_after": booking.room.number,
+                    "check_in_date_after": new_check_in_date,
+                    "check_out_date_after": new_check_out_date,
                 }
             )
             return booking
 
-        except RoomNotAvailableException as e:
+        except RoomNotAvailableException:
             logger.error("Modification failed: room unavailable for new dates")
             raise
-        except InvalidBookingModificationException as e:
+        except InvalidBookingModificationException:
             logger.error(f"Invalid modification: Booking {booking_id} status is not confirmed")
             raise
         except Exception as e:

@@ -56,3 +56,23 @@ class BookingFilterSerializer(serializers.Serializer):
             raise serializers.ValidationError("Check-out date must be after check-in date.")
 
         return data
+
+
+class BookingUpdateSerializer(serializers.Serializer):
+    check_in_date = serializers.DateField(input_formats=DATE_INPUT_FORMATS, required=True)
+    check_out_date = serializers.DateField(input_formats=DATE_INPUT_FORMATS, required=True)
+    room_type = serializers.ChoiceField(choices=RoomType.choices(), required=True)
+
+    def validate(self, data):
+        check_in_date = data.get('check_in_date')
+        check_out_date = data.get('check_out_date')
+        today = date.today()
+
+        if check_in_date <= today:
+            raise serializers.ValidationError("Check-in date must be in the future.")
+        if check_out_date <= today:
+            raise serializers.ValidationError("Check-out date must be in the future.")
+        if check_in_date >= check_out_date:
+            raise serializers.ValidationError("Check-out date must be after check-in date.")
+
+        return data

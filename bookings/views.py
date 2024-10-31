@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from bookings.serializers import (
     BookingSerializer,
     BookingCreateSerializer,
-    BookingFilterSerializer
+    BookingFilterSerializer, BookingUpdateSerializer
 )
 from bookings.services import BookingService
 from utils.exceptions import RoomNotAvailableException, InvalidBookingConfirmationException, \
@@ -121,8 +121,8 @@ class BookingDetailView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        operation_description="Update booking check-in or check-out dates.",
-        request_body=BookingCreateSerializer,
+        operation_description="Update booking check-in or check-out dates with room type.",
+        request_body=BookingUpdateSerializer,
         responses={
             200: "Booking modified successfully.",
             400: "Invalid modification",
@@ -131,16 +131,18 @@ class BookingDetailView(RetrieveUpdateDestroyAPIView):
         }
     )
     def put(self, request, booking_id):
-        serializer = BookingCreateSerializer(data=request.data)
+        serializer = BookingUpdateSerializer(data=request.data)
         if serializer.is_valid():
             new_check_in_date = serializer.validated_data['check_in_date']
             new_check_out_date = serializer.validated_data['check_out_date']
+            room_type = serializer.validated_data['room_type']
 
             try:
                 booking = self.booking_service.modify_booking(
                     booking_id=booking_id,
                     new_check_in_date=new_check_in_date,
-                    new_check_out_date=new_check_out_date
+                    new_check_out_date=new_check_out_date,
+                    room_type=room_type
                 )
                 return Response(BookingSerializer(booking).data, status=status.HTTP_200_OK)
             except (InvalidBookingModificationException, RoomNotAvailableException) as e:

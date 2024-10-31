@@ -97,24 +97,43 @@ def test_create_booking_no_room_available(booking_service, booking_data):
 
 @pytest.mark.django_db
 def test_modify_booking_success(booking_service, booking_data, mock_room):
+    # Define new dates for modification
     new_check_in_date = booking_data["check_in_date"] + timedelta(days=1)
     new_check_out_date = booking_data["check_out_date"] + timedelta(days=1)
 
     with patch.object(booking_service.booking_repository, 'get_booking_by_id') as mock_get_booking, \
-         patch.object(booking_service.booking_repository, 'is_room_available', return_value=True):
+            patch.object(booking_service.booking_repository, 'is_room_available', return_value=True), \
+            patch('bookings.services.EmailService.send_booking_modification') as mock_send_email:
+
         mock_booking = Mock(**booking_data)
         mock_booking.status = BookingStatus.CONFIRMED.value
         mock_booking.room = mock_room
+        original_room_number = mock_room.number
+        original_check_in_date = mock_booking.check_in_date
+        original_check_out_date = mock_booking.check_out_date
         mock_get_booking.return_value = mock_booking
 
         modified_booking = booking_service.modify_booking(
             booking_id=1,
             new_check_in_date=new_check_in_date,
-            new_check_out_date=new_check_out_date
+            new_check_out_date=new_check_out_date,
+            room_type=mock_room.room_type
         )
 
         assert modified_booking.check_in_date == new_check_in_date
         assert modified_booking.check_out_date == new_check_out_date
+
+        mock_send_email.assert_called_once_with(
+            mock_booking.client.email,
+            {
+                "room_number_before": original_room_number,
+                "check_in_date_before": original_check_in_date,
+                "check_out_date_before": original_check_out_date,
+                "room_number_after": mock_booking.room.number,
+                "check_in_date_after": new_check_in_date,
+                "check_out_date_after": new_check_out_date,
+            }
+        )
 
 
 @pytest.mark.django_db
