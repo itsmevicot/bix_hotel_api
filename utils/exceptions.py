@@ -87,3 +87,11 @@ class AlreadyCheckedOutException(ExceptionMessageBuilder):
         self.message = "This booking has already been checked out."
         self.status_code = status.HTTP_409_CONFLICT
         self.detail = {"title": self.title, "message": self.message}
+
+
+class AlreadyCanceledException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Already Canceled"
+        self.message = "This booking has already been canceled."
+        self.status_code = status.HTTP_409_CONFLICT
+        self.detail = {"title": self.title, "message": self.message}

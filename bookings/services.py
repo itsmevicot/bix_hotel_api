@@ -15,7 +15,7 @@ from users.enums import UserRole
 from users.models import User
 from utils.email_service import EmailService
 from utils.exceptions import RoomNotAvailableException, InvalidBookingModificationException, \
-    InvalidBookingConfirmationException
+    InvalidBookingConfirmationException, UnauthorizedCancellationException, AlreadyCanceledException
 
 logger = logging.getLogger(__name__)
 
@@ -163,16 +163,25 @@ class BookingService:
             raise e
 
     @transaction.atomic
-    def cancel_booking(
-            self,
-            booking: Booking
-    ) -> Booking:
+    def cancel_booking(self, booking_id: int, user) -> Booking:
         try:
-            booking.status = BookingStatus.CANCELLED.value
-            booking.room.status = RoomStatus.AVAILABLE.value
-            booking.room.save()
-            booking.save()
+            # Retrieve the booking object
+            booking = self.booking_repository.get_booking_by_id(booking_id)
 
+            # Check if the booking belongs to the user
+            if booking.client != user:
+                logger.warning(f"User {user.id} attempted to cancel booking {booking_id} they do not own.")
+                raise UnauthorizedCancellationException()
+
+            # Check if the booking is already canceled
+            if booking.status == BookingStatus.CANCELLED.value:
+                logger.info(f"Booking {booking_id} is already canceled.")
+                raise AlreadyCanceledException()
+
+            # Proceed with the cancellation
+            self.booking_repository.cancel_booking(booking)
+
+            # Send cancellation email
             EmailService.send_booking_cancellation(booking.client.email, {
                 "room_number": booking.room.number,
                 "check_in_date": booking.check_in_date
@@ -181,8 +190,10 @@ class BookingService:
             logger.info(f"Booking {booking.id} canceled for client {booking.client.id}")
             return booking
 
+        except (UnauthorizedCancellationException, AlreadyCanceledException):
+            raise
         except Exception as e:
-            logger.exception("Failed to cancel booking %s", booking.id)
+            logger.exception(f"Failed to cancel booking {booking_id}")
             raise e
 
     def get_filtered_bookings(

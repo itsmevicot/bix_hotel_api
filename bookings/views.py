@@ -15,7 +15,7 @@ from bookings.serializers import (
 )
 from bookings.services import BookingService
 from utils.exceptions import RoomNotAvailableException, InvalidBookingConfirmationException, \
-    InvalidBookingModificationException
+    InvalidBookingModificationException, UnauthorizedCancellationException, AlreadyCanceledException
 
 logger = logging.getLogger(__name__)
 
@@ -154,12 +154,18 @@ class BookingDetailView(RetrieveUpdateDestroyAPIView):
         responses={
             204: "Booking canceled successfully.",
             403: "Unauthorized cancellation attempt.",
+            400: "Booking already canceled.",
             500: "Internal server error."
         }
     )
     def delete(self, request, booking_id):
-        self.booking_service.cancel_booking(booking_id, request.user)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            self.booking_service.cancel_booking(booking_id, request.user)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except (UnauthorizedCancellationException, AlreadyCanceledException) as e:
+            return Response({"error": str(e.detail)}, status=e.status_code)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ConfirmBookingView(APIView):
