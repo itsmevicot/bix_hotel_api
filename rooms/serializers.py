@@ -54,3 +54,16 @@ class RoomAvailabilityFilterSerializer(serializers.Serializer):
         if data['check_in_date'] >= data['check_out_date']:
             raise serializers.ValidationError("check_out_date must be after check_in_date.")
         return data
+
+
+class RoomAvailabilitySerializer(serializers.Serializer):
+    room_number = serializers.CharField(
+        max_length=10,
+        help_text="The room number to check availability for."
+    )
+    available = serializers.BooleanField(read_only=True)
+
+    def validate_room_number(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Room number must be numeric.")
+        return value

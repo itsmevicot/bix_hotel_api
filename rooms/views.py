@@ -10,7 +10,7 @@ from rooms.serializers import (
     RoomAvailabilityFilterSerializer,
     RoomListSerializer,
     RoomCreateSerializer,
-    RoomDetailSerializer,
+    RoomDetailSerializer, RoomAvailabilitySerializer,
 )
 from rooms.services import RoomService
 from users.enums import UserRole
@@ -60,7 +60,7 @@ class RoomListView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        room = self.room_service.create_room(user=request.user, **serializer.validated_data)
+        room = self.room_service.create_room(**serializer.validated_data)
         response_serializer = RoomDetailSerializer(room)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -123,17 +123,24 @@ class RoomAvailabilityView(APIView):
         self.room_service = room_service or RoomService()
 
     @swagger_auto_schema(
-        operation_description="Check if a specific room is available.",
-        responses={200: openapi.Response("Room availability", schema=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={'available': openapi.Schema(type=openapi.TYPE_BOOLEAN)}
-        )),
-                   404: "Room not found"}
+        operation_description="Check if a specific room is available by room number.",
+        responses={
+            200: RoomAvailabilitySerializer,
+            404: "Room not found"
+        }
     )
-    def get(self, request, room_id):
+    def get(self, request, room_number):
+        serializer = RoomAvailabilitySerializer(data={"room_number": room_number})
+        serializer.is_valid(raise_exception=True)
+
         try:
-            is_available = self.room_service.check_availability(room_id)
-            return Response({"available": is_available}, status=status.HTTP_200_OK)
+            is_available = self.room_service.check_availability_by_number(serializer.validated_data['room_number'])
+            return Response(
+                RoomAvailabilitySerializer(
+                    {
+                        "room_number": room_number,
+                        "available": is_available
+                    }).data, status=status.HTTP_200_OK)
         except RoomNotAvailableException as e:
             return Response({"error": e.message}, status=e.status_code)
 

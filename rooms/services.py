@@ -123,23 +123,14 @@ class RoomService:
             logger.error(f"Error deleting room: {e}")
             raise
 
-    def check_availability(
-            self,
-            room_id: int
+    @staticmethod
+    def check_availability_by_number(
+            room_number: str
     ) -> bool:
-        try:
-            logger.info(f"Checking availability for room with ID={room_id}")
-            room = self.get_room(room_id)
-            if room.status != RoomStatus.AVAILABLE.value:
-                raise RoomNotAvailableException()
-            logger.info(f"Room with ID={room_id} is available")
-            return True
-        except RoomNotAvailableException as e:
-            logger.warning(f"Room not available: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Error checking room availability: {e}")
-            raise
+        room = Room.objects.filter(number=room_number).first()
+        if not room or room.status != RoomStatus.AVAILABLE.value:
+            raise RoomNotAvailableException()
+        return True
 
     def get_available_rooms(
             self,

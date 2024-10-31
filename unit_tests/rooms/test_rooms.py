@@ -89,7 +89,7 @@ def test_retrieve_room(auth_api_client, sample_room):
 
 @pytest.mark.django_db
 def test_check_room_availability(auth_api_client, sample_room):
-    url = reverse("rooms:room-availability", args=[sample_room.id])
+    url = reverse("rooms:room-availability", args=[sample_room.number])
     response = auth_api_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
@@ -101,7 +101,7 @@ def test_check_room_not_available(auth_api_client, sample_room):
     sample_room.status = RoomStatus.OCCUPIED.value
     sample_room.save()
 
-    url = reverse("rooms:room-availability", args=[sample_room.id])
+    url = reverse("rooms:room-availability", args=[sample_room.number])
     response = auth_api_client.get(url)
 
     assert response.status_code == status.HTTP_409_CONFLICT
