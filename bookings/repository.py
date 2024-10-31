@@ -90,15 +90,10 @@ class BookingRepository:
         return queryset
 
     @staticmethod
-    def get_no_show_bookings(no_show_threshold: datetime) -> List[Booking]:
-        """
-        Retrieves bookings that are confirmed, have passed the check-in date by 24 hours,
-        and have not completed check-in.
-        """
+    def get_no_show_bookings(threshold_time):
         return Booking.objects.filter(
-            status=BookingStatus.CONFIRMED.value,
-            check_in_date__lte=no_show_threshold,
-            check_in_check_out__check_in_status=CheckInStatus.PENDING.value
+            check_in_date__lte=threshold_time,
+            status=BookingStatus.CONFIRMED.value
         )
 
     @staticmethod
@@ -118,7 +113,7 @@ class BookingRepository:
         """
         return Booking.objects.filter(
             status=BookingStatus.COMPLETED.value,
-            check_in_check_out__check_out_timestamp__lte=current_time
+            check_in_out__check_out_timestamp__lte=current_time
         )
 
     @staticmethod
