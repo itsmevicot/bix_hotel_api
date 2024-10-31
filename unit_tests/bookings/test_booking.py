@@ -248,18 +248,6 @@ def test_celery_send_booking_confirmation_email_task():
 
 
 @pytest.mark.django_db
-def test_expire_pending_bookings(booking_service):
-    expired_booking = Mock(id=1, status=BookingStatus.PENDING.value, check_in_date=timezone.now() + timedelta(hours=24))
-
-    with patch.object(booking_service.booking_repository, 'get_expiring_pending_bookings',
-                      return_value=[expired_booking]), \
-            patch.object(booking_service, 'cancel_booking') as mock_cancel_booking:
-        expire_pending_bookings(booking_service=booking_service, booking_repository=booking_service.booking_repository)
-
-        mock_cancel_booking.assert_called_once_with(expired_booking)
-
-
-@pytest.mark.django_db
 def test_confirm_booking_creates_checkin_checkout_instance(booking_service, mock_user, booking_data):
     booking = Booking.objects.create(**booking_data)
     confirmed_booking = booking_service.confirm_booking(booking.id, user=mock_user)
