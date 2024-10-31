@@ -187,7 +187,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=0),
     },
     'manage-room-availability-hourly': {
-        'task': 'path.to.manage_room_availability',
+        'task': 'bookings.tasks.manage_room_availability',
         'schedule': crontab(minute=0, hour='*'),
     },
 }

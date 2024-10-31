@@ -15,7 +15,7 @@ from users.enums import UserRole
 from users.models import User
 from utils.email_service import EmailService
 from utils.exceptions import RoomNotAvailableException, InvalidBookingModificationException, \
-    InvalidBookingConfirmationException, UnauthorizedCancellationException, AlreadyCanceledException, \
+    UnauthorizedCancellationException, AlreadyCanceledException, \
     UnauthorizedOrInvalidBookingException
 
 logger = logging.getLogger(__name__)
