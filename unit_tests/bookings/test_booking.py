@@ -17,7 +17,7 @@ from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
 from users.enums import UserRole
 from users.models import User
-from utils.exceptions import RoomNotAvailableException, InvalidBookingConfirmationException
+from utils.exceptions import RoomNotAvailableException, UnauthorizedOrInvalidBookingException
 
 
 @pytest.fixture
@@ -68,18 +68,20 @@ def valid_check_out_date():
 
 
 @pytest.fixture
-def booking_data(mock_user, valid_check_in_date, valid_check_out_date):
+def booking_data(mock_user, mock_room):
     return {
         "client": mock_user,
-        "check_in_date": valid_check_in_date,
-        "check_out_date": valid_check_out_date,
+        "room": mock_room,
+        "check_in_date": date.today(),
+        "check_out_date": date.today() + timedelta(days=2),
         "status": BookingStatus.PENDING.value
     }
 
 
 @pytest.mark.django_db
-def test_confirm_booking_success(booking_service: BookingService, mock_booking):
-    confirmed_booking = booking_service.confirm_booking(mock_booking)
+def test_confirm_booking_success(booking_service, mock_user, booking_data):
+    booking = Booking.objects.create(**booking_data)
+    confirmed_booking = booking_service.confirm_booking(booking.id, user=mock_user)
     assert confirmed_booking.status == BookingStatus.CONFIRMED.value
     assert CheckInCheckOut.objects.filter(booking=confirmed_booking).exists()
 
@@ -172,29 +174,22 @@ def test_modify_booking_success(booking_service):
 
 
 @pytest.mark.django_db
-def test_confirm_booking_not_pending(booking_service, booking_data):
-    with patch.object(booking_service.booking_repository, 'get_booking_by_id') as mock_get_booking:
-        mock_booking = Mock(**booking_data)
-        mock_booking.status = BookingStatus.CONFIRMED.value
-        mock_get_booking.return_value = mock_booking
+def test_confirm_booking_not_pending(booking_service, mock_user, booking_data):
+    booking = Booking.objects.create(**booking_data)
+    booking.status = BookingStatus.CONFIRMED.value
+    booking.save()
 
-        with pytest.raises(InvalidBookingConfirmationException):
-            booking_service.confirm_booking(mock_booking)
+    with pytest.raises(UnauthorizedOrInvalidBookingException):
+        booking_service.confirm_booking(booking.id, user=mock_user)
 
 
 @pytest.mark.django_db
-def test_cancel_booking_success(booking_service, booking_data, mock_room):
-    with patch.object(booking_service.booking_repository, 'get_booking_by_id') as mock_get_booking:
-        mock_booking = Mock(**booking_data)
-        mock_booking.status = BookingStatus.PENDING.value
-        mock_booking.room = mock_room
-        mock_room.status = RoomStatus.OCCUPIED.value
-        mock_get_booking.return_value = mock_booking
+def test_cancel_booking_success(booking_service, mock_user, booking_data):
+    booking = Booking.objects.create(**booking_data)
+    canceled_booking = booking_service.cancel_booking(booking.id, user=mock_user)
 
-        canceled_booking = booking_service.cancel_booking(mock_booking)
-
-        assert canceled_booking.status == BookingStatus.CANCELLED.value
-        assert canceled_booking.room.status == RoomStatus.AVAILABLE.value
+    assert canceled_booking.status == BookingStatus.CANCELLED.value
+    assert canceled_booking.room.status == RoomStatus.AVAILABLE.value
 
 
 def test_get_filtered_bookings_client(booking_service, mock_user):
@@ -265,48 +260,54 @@ def test_expire_pending_bookings(booking_service):
 
 
 @pytest.mark.django_db
-def test_confirm_booking_creates_checkin_checkout_instance(booking_service: BookingService, mock_booking):
-    with patch.object(booking_service.check_in_out_repository, 'create_check_in_out') as mock_create_check_in_out:
-        confirmed_booking = booking_service.confirm_booking(mock_booking)
-        mock_create_check_in_out.assert_called_once_with(confirmed_booking)
-        assert confirmed_booking.status == BookingStatus.CONFIRMED.value
+def test_confirm_booking_creates_checkin_checkout_instance(booking_service, mock_user, booking_data):
+    booking = Booking.objects.create(**booking_data)
+    confirmed_booking = booking_service.confirm_booking(booking.id, user=mock_user)
+
+    assert CheckInCheckOut.objects.filter(booking=confirmed_booking).exists()
 
 
 @pytest.mark.django_db
-def test_confirm_booking_non_pending_status_raises_exception(booking_service, booking_data):
-    with patch.object(booking_service.booking_repository, 'get_booking_by_id') as mock_get_booking:
-        mock_booking = Mock(**booking_data)
-        mock_booking.status = BookingStatus.CONFIRMED.value
-        mock_get_booking.return_value = mock_booking
+def test_confirm_booking_non_pending_status_raises_exception(booking_service, mock_user, booking_data):
+    booking = Booking.objects.create(**booking_data)
+    booking.status = BookingStatus.CONFIRMED.value
+    booking.save()
 
-        with pytest.raises(InvalidBookingConfirmationException):
-            booking_service.confirm_booking(mock_booking)
+    with pytest.raises(UnauthorizedOrInvalidBookingException):
+        booking_service.confirm_booking(booking.id, user=mock_user)
 
 
 @pytest.mark.django_db
-def test_confirm_booking_sends_confirmation_email(booking_service: BookingService, mock_booking):
+def test_confirm_booking_sends_confirmation_email(booking_service, mock_user, booking_data):
+    booking = Booking.objects.create(**booking_data)
+
     with patch('utils.email_service.EmailService.send_booking_confirmation') as mock_send_email:
-        booking_service.confirm_booking(mock_booking)
-        mock_send_email.assert_called_once_with(mock_booking.client.email, {
-            "room_number": mock_booking.room.number,
-            "check_in_date": mock_booking.check_in_date
+        booking_service.confirm_booking(booking.id, user=mock_user)
+        mock_send_email.assert_called_once_with(mock_user.email, {
+            "room_number": booking.room.number,
+            "check_in_date": booking.check_in_date
         })
 
 
 @pytest.mark.django_db
-def test_confirm_booking_logs_success_information(booking_service, booking_data, caplog):
-    with patch.object(booking_service.booking_repository, 'get_booking_by_id') as mock_get_booking, \
-            patch.object(booking_service.check_in_out_repository, 'create_check_in_out'):
-        mock_booking = Mock(**booking_data)
-        mock_booking.status = BookingStatus.PENDING.value
-        mock_booking.room.number = "101"
-        mock_get_booking.return_value = mock_booking
+def test_confirm_booking_logs_success_information(booking_service, mock_user, caplog):
+    booking = Booking.objects.create(
+        client=mock_user,
+        room=Room.objects.create(
+            number="101",
+            status=RoomStatus.AVAILABLE.value,
+            room_type=RoomType.SINGLE.value,
+            price=100.0
+        ),
+        check_in_date=date.today(),
+        check_out_date=date.today() + timedelta(days=2),
+        status=BookingStatus.PENDING.value
+    )
 
-        with caplog.at_level(logging.INFO):
-            booking_service.confirm_booking(mock_booking)
+    with caplog.at_level(logging.INFO):
+        booking_service.confirm_booking(booking.id, user=mock_user)
 
-        assert (f"Booking {mock_booking.id} confirmed"
-                f" and CheckInCheckOut created for client {mock_booking.client.id}") in caplog.text
+    assert f"Booking {booking.id} confirmed and CheckInCheckOut created for client {booking.client.id}" in caplog.text
 
 
 @pytest.mark.django_db
