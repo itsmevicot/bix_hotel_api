@@ -3,7 +3,6 @@ from typing import Optional
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,8 +13,8 @@ from bookings.serializers import (
     BookingFilterSerializer, BookingUpdateSerializer
 )
 from bookings.services import BookingService
-from utils.exceptions import RoomNotAvailableException, InvalidBookingConfirmationException, \
-    InvalidBookingModificationException, UnauthorizedCancellationException, AlreadyCanceledException, \
+from utils.exceptions import RoomNotAvailableException, InvalidBookingModificationException, \
+    UnauthorizedCancellationException, AlreadyCanceledException, \
     UnauthorizedOrInvalidBookingException
 
 logger = logging.getLogger(__name__)
@@ -93,7 +92,7 @@ class BookingListView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class BookingDetailView(RetrieveUpdateDestroyAPIView):
+class BookingDetailView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BookingSerializer
 

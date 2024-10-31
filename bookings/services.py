@@ -229,7 +229,7 @@ class BookingService:
             if filters.get("status"):
                 filter_criteria["status"] = filters["status"]
             if filters.get("room_type"):
-                filter_criteria["room__type"] = filters["room_type"]
+                filter_criteria["room__room_type"] = filters["room_type"]
 
             if user.role in [UserRole.STAFF.value, UserRole.ADMIN.value] and filters.get("client_id"):
                 filter_criteria["client_id"] = filters["client_id"]
