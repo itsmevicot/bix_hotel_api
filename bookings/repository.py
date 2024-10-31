@@ -149,3 +149,8 @@ class BookingRepository:
     def confirm_booking(booking: Booking) -> None:
         booking.status = BookingStatus.CONFIRMED.value
         booking.save()
+
+    @staticmethod
+    def update_booking_status_to_complete(booking: Booking) -> None:
+        booking.status = BookingStatus.COMPLETED.value
+        booking.save()

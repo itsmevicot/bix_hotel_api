@@ -17,19 +17,13 @@ class CheckInCheckOutRepository:
         return CheckInCheckOut.objects.filter(booking=booking).first()
 
     @staticmethod
-    def update_check_in_status(
-            check_in_out: CheckInCheckOut,
-            status: CheckInStatus
-    ) -> None:
-        check_in_out.check_in_status = status
+    def update_check_in_status(check_in_out: CheckInCheckOut) -> None:
+        check_in_out.check_in_status = CheckInStatus.COMPLETED.value
         check_in_out.check_in_timestamp = timezone.now()
         check_in_out.save()
 
     @staticmethod
-    def update_check_out_status(
-            check_in_out: CheckInCheckOut,
-            status: CheckOutStatus
-    ) -> None:
-        check_in_out.check_out_status = status
+    def update_check_out_status(check_in_out: CheckInCheckOut) -> None:
+        check_in_out.check_out_status = CheckOutStatus.COMPLETED.value
         check_in_out.check_out_timestamp = timezone.now()
         check_in_out.save()
