@@ -15,7 +15,7 @@ from rooms.serializers import (
 from rooms.services import RoomService
 from users.enums import UserRole
 from utils.custom_permissions import IsAdminUser
-from utils.exceptions import RoomNotAvailableException
+from utils.exceptions import RoomNotAvailableException, RoomNotFoundException
 
 
 class RoomListView(APIView):
@@ -142,6 +142,9 @@ class RoomAvailabilityView(APIView):
                         "available": is_available
                     }).data, status=status.HTTP_200_OK)
         except RoomNotAvailableException as e:
+            return Response({"error": e.message}, status=e.status_code)
+
+        except RoomNotFoundException as e:
             return Response({"error": e.message}, status=e.status_code)
 
 

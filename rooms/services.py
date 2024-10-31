@@ -127,8 +127,11 @@ class RoomService:
     def check_availability_by_number(
             room_number: str
     ) -> bool:
+
         room = Room.objects.filter(number=room_number).first()
-        if not room or room.status != RoomStatus.AVAILABLE.value:
+        if not room:
+            raise RoomNotFoundException()
+        if room.status != RoomStatus.AVAILABLE.value:
             raise RoomNotAvailableException()
         return True
 
