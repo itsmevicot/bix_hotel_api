@@ -6,6 +6,8 @@ from bookings.enums import BookingStatus
 from bookings.repository import BookingRepository
 from checkins.enums import CheckInStatus, CheckOutStatus
 from checkins.repository import CheckInCheckOutRepository
+from rooms.enums import RoomStatus
+from rooms.repository import RoomRepository
 from utils.email_service import EmailService
 from utils.exceptions import (
     AlreadyCheckedOutException, InvalidBookingStatusException, AlreadyCheckedInException,
@@ -20,10 +22,12 @@ class CheckInCheckOutService:
     def __init__(
             self,
             check_in_out_repository: Optional[CheckInCheckOutRepository] = None,
-            booking_repository: Optional[BookingRepository] = None
+            booking_repository: Optional[BookingRepository] = None,
+            room_repository: Optional[RoomRepository] = None
     ) -> None:
         self.check_in_out_repository = check_in_out_repository or CheckInCheckOutRepository()
         self.booking_repository = booking_repository or BookingRepository()
+        self.room_repository = room_repository or RoomRepository()
 
     @transaction.atomic
     def perform_check_in(self, booking_id: int, user) -> CheckInStatus:
@@ -45,7 +49,10 @@ class CheckInCheckOutService:
                 raise AlreadyCheckedInException()
 
             self.check_in_out_repository.update_check_in_status(check_in_out)
+
             self.booking_repository.update_booking_status_to_complete(booking)
+
+            self.room_repository.update_room_status(booking.room, RoomStatus.OCCUPIED)
 
             EmailService.send_checkin(
                 booking.client.email,
@@ -55,7 +62,7 @@ class CheckInCheckOutService:
                 }
             )
 
-            logger.info(f"Booking {booking_id} successfully checked in and marked as COMPLETE.")
+            logger.info(f"Booking {booking_id} successfully checked in, room marked as OCCUPIED.")
             return CheckInStatus.COMPLETED
 
         except (InvalidBookingStatusException, AlreadyCheckedInException, UnauthorizedOrInvalidBookingException) as e:

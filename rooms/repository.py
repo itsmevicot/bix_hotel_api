@@ -102,3 +102,8 @@ class RoomRepository:
         available_rooms = Room.objects.filter(**room_filters).exclude(id__in=unavailable_rooms)
 
         return available_rooms
+
+    @staticmethod
+    def update_room_status(room: Room, status: RoomStatus) -> None:
+        room.status = status.value
+        room.save()
