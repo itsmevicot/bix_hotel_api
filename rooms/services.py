@@ -1,11 +1,9 @@
 import logging
-import traceback
 from datetime import date
 from decimal import Decimal
 from typing import Optional, List
 
-from django.core.exceptions import ValidationError
-from django.db import transaction, IntegrityError
+from django.db import transaction
 from django.db.models import QuerySet
 
 from rooms.enums import RoomStatus, RoomType
