@@ -101,6 +101,8 @@ REST_FRAMEWORK = {
 
 }
 
+DATE_INPUT_FORMATS = ["%d/%m/%Y"]
+
 # Swagger
 
 SWAGGER_SETTINGS = {

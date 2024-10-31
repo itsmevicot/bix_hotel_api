@@ -1,7 +1,8 @@
 import logging
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from bookings.enums import BookingStatus
@@ -168,13 +169,28 @@ class BookingService:
         """
         try:
             filter_criteria = {}
+
             if user.role == UserRole.CLIENT.value:
                 filter_criteria["client"] = user
 
             if filters.get("check_in_date"):
-                filter_criteria["check_in_date__gte"] = filters["check_in_date"]
+                check_in_date = filters["check_in_date"]
+                if isinstance(check_in_date, str):
+                    try:
+                        check_in_date = datetime.strptime(check_in_date, "%d/%m/%Y").date()
+                    except ValueError:
+                        raise ValidationError("Invalid check-in date format. Use dd/mm/yyyy.")
+                filter_criteria["check_in_date__gte"] = check_in_date
+
             if filters.get("check_out_date"):
-                filter_criteria["check_out_date__lte"] = filters["check_out_date"]
+                check_out_date = filters["check_out_date"]
+                if isinstance(check_out_date, str):
+                    try:
+                        check_out_date = datetime.strptime(check_out_date, "%d/%m/%Y").date()
+                    except ValueError:
+                        raise ValidationError("Invalid check-out date format. Use dd/mm/yyyy.")
+                filter_criteria["check_out_date__lte"] = check_out_date
+
             if filters.get("status"):
                 filter_criteria["status"] = filters["status"]
             if filters.get("room_type"):

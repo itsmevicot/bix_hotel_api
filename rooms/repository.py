@@ -34,7 +34,7 @@ class RoomRepository:
     def get_available_room(
             room_type: RoomType = None
     ) -> Room:
-        room = Room.objects.filter(status=RoomStatus.AVAILABLE.value, type=room_type).first()
+        room = Room.objects.filter(status=RoomStatus.AVAILABLE.value, room_type=room_type).first()
 
         if not room:
             raise RoomNotAvailableException()
