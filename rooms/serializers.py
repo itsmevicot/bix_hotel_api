@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from rooms.enums import RoomType
+from rooms.enums import RoomType, RoomStatus
 from rooms.models import Room
 
 
@@ -67,3 +67,9 @@ class RoomAvailabilitySerializer(serializers.Serializer):
         if not value.isdigit():
             raise serializers.ValidationError("Room number must be numeric.")
         return value
+
+
+class RoomListFilterSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=RoomStatus.choices(), required=False)
+    room_type = serializers.ChoiceField(choices=RoomType.choices(), required=False)
+

@@ -107,3 +107,15 @@ class RoomRepository:
     def update_room_status(room: Room, status: RoomStatus) -> None:
         room.status = status.value
         room.save()
+
+    def filter_rooms(
+            self,
+            status: Optional[RoomStatus] = None,
+            room_type: Optional[RoomType] = None
+    ):
+        queryset = self.get_all_rooms()
+        if status:
+            queryset = queryset.filter(status=status)
+        if room_type:
+            queryset = queryset.filter(room_type=room_type)
+        return queryset

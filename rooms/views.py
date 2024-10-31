@@ -10,7 +10,7 @@ from rooms.serializers import (
     RoomAvailabilityFilterSerializer,
     RoomListSerializer,
     RoomCreateSerializer,
-    RoomDetailSerializer, RoomAvailabilitySerializer,
+    RoomDetailSerializer, RoomAvailabilitySerializer, RoomListFilterSerializer,
 )
 from rooms.services import RoomService
 from users.enums import UserRole
@@ -31,18 +31,23 @@ class RoomListView(APIView):
 
     @swagger_auto_schema(
         operation_description="Retrieve a list of rooms with optional filters for status and type.",
-        manual_parameters=[
-            openapi.Parameter('status', openapi.IN_QUERY, description="Room status", type=openapi.TYPE_STRING),
-            openapi.Parameter('type', openapi.IN_QUERY, description="Room type", type=openapi.TYPE_STRING),
-        ],
-        responses={200: RoomListSerializer(many=True)}
+        query_serializer=RoomListFilterSerializer,
+        responses={
+            200: RoomListSerializer(many=True)
+        }
     )
     def get(self, request):
-        status_filter = request.query_params.get("status")
-        room_type_filter = request.query_params.get("type")
+        filter_serializer = RoomListFilterSerializer(data=request.query_params)
+        filter_serializer.is_valid(raise_exception=True)
+
+        filters = filter_serializer.validated_data
+        status_filter = filters.get("status")
+        room_type_filter = filters.get("room_type")
+
         rooms = self.room_service.list_rooms(status=status_filter, room_type=room_type_filter)
-        serializer = RoomListSerializer(rooms, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_serializer = RoomListSerializer(rooms, many=True)
+
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Create a new room. Admin access required.",
@@ -196,3 +201,5 @@ class RoomAvailabilityFilterView(APIView):
 
         except RoomNotAvailableException as e:
             return Response({"error": e.message}, status=e.status_code)
+
+

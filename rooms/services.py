@@ -31,11 +31,7 @@ class RoomService:
     ) -> List[Room]:
         try:
             logger.info(f"Listing rooms with status={status} and room_type={room_type}")
-            queryset = self.room_repository.get_all_rooms()
-            if status:
-                queryset = queryset.filter(status=status)
-            if room_type:
-                queryset = queryset.filter(type=room_type)
+            queryset = self.room_repository.filter_rooms(status=status, room_type=room_type)
             logger.info(f"Listed {queryset.count()} rooms")
             return list(queryset)
         except Exception as e:
