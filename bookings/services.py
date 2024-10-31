@@ -15,7 +15,8 @@ from users.enums import UserRole
 from users.models import User
 from utils.email_service import EmailService
 from utils.exceptions import RoomNotAvailableException, InvalidBookingModificationException, \
-    InvalidBookingConfirmationException, UnauthorizedCancellationException, AlreadyCanceledException
+    InvalidBookingConfirmationException, UnauthorizedCancellationException, AlreadyCanceledException, \
+    UnauthorizedOrInvalidBookingException
 
 logger = logging.getLogger(__name__)
 
@@ -133,17 +134,19 @@ class BookingService:
             raise e
 
     @transaction.atomic
-    def confirm_booking(
-            self,
-            booking: Booking
-    ) -> Booking:
+    def confirm_booking(self, booking_id: int, user) -> Booking:
         try:
+            booking = self.booking_repository.get_booking_by_id(booking_id)
+
+            if booking.client != user:
+                logger.error("User does not own this booking.")
+                raise UnauthorizedOrInvalidBookingException()
+
             if booking.status != BookingStatus.PENDING.value:
                 logger.error("Only pending bookings can be confirmed.")
-                raise InvalidBookingConfirmationException()
+                raise UnauthorizedOrInvalidBookingException()
 
-            booking.status = BookingStatus.CONFIRMED.value
-            booking.save()
+            self.booking_repository.confirm_booking(booking)
 
             self.check_in_out_repository.create_check_in_out(booking)
 
@@ -155,33 +158,28 @@ class BookingService:
             logger.info(f"Booking {booking.id} confirmed and CheckInCheckOut created for client {booking.client.id}")
             return booking
 
-        except InvalidBookingConfirmationException as e:
+        except UnauthorizedOrInvalidBookingException as e:
             logger.error(f"Cannot confirm booking: {e}")
             raise
         except Exception as e:
-            logger.exception(f"Failed to confirm booking {booking.id}")
+            logger.exception(f"Failed to confirm booking {booking_id}")
             raise e
 
     @transaction.atomic
     def cancel_booking(self, booking_id: int, user) -> Booking:
         try:
-            # Retrieve the booking object
             booking = self.booking_repository.get_booking_by_id(booking_id)
 
-            # Check if the booking belongs to the user
             if booking.client != user:
                 logger.warning(f"User {user.id} attempted to cancel booking {booking_id} they do not own.")
                 raise UnauthorizedCancellationException()
 
-            # Check if the booking is already canceled
             if booking.status == BookingStatus.CANCELLED.value:
                 logger.info(f"Booking {booking_id} is already canceled.")
                 raise AlreadyCanceledException()
 
-            # Proceed with the cancellation
             self.booking_repository.cancel_booking(booking)
 
-            # Send cancellation email
             EmailService.send_booking_cancellation(booking.client.email, {
                 "room_number": booking.room.number,
                 "check_in_date": booking.check_in_date

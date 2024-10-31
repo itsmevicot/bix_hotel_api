@@ -144,3 +144,8 @@ class BookingRepository:
         ).exclude(id=exclude_booking_id)
 
         return not conflicting_bookings.exists()
+
+    @staticmethod
+    def confirm_booking(booking: Booking) -> None:
+        booking.status = BookingStatus.CONFIRMED.value
+        booking.save()

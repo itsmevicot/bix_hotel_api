@@ -95,3 +95,11 @@ class AlreadyCanceledException(ExceptionMessageBuilder):
         self.message = "This booking has already been canceled."
         self.status_code = status.HTTP_409_CONFLICT
         self.detail = {"title": self.title, "message": self.message}
+
+
+class UnauthorizedOrInvalidBookingException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Unauthorized or Invalid Booking"
+        self.message = "Unauthorized action or invalid booking status."
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = {"title": self.title, "message": self.message}

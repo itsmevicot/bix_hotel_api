@@ -15,7 +15,8 @@ from bookings.serializers import (
 )
 from bookings.services import BookingService
 from utils.exceptions import RoomNotAvailableException, InvalidBookingConfirmationException, \
-    InvalidBookingModificationException, UnauthorizedCancellationException, AlreadyCanceledException
+    InvalidBookingModificationException, UnauthorizedCancellationException, AlreadyCanceledException, \
+    UnauthorizedOrInvalidBookingException
 
 logger = logging.getLogger(__name__)
 
@@ -189,36 +190,8 @@ class ConfirmBookingView(APIView):
     )
     def post(self, request, booking_id):
         try:
-            booking = self.booking_service.confirm_booking(booking_id)
+            booking = self.booking_service.confirm_booking(booking_id, request.user)
             serializer = BookingSerializer(booking)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except InvalidBookingConfirmationException as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CancelBookingView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def __init__(
-            self,
-            booking_service: Optional[BookingService] = None,
-            **kwargs
-    ):
-        super().__init__(**kwargs)
-        self.booking_service = booking_service or BookingService()
-
-    @swagger_auto_schema(
-        operation_description="Cancel a specific booking.",
-        responses={
-            200: BookingSerializer,
-            400: "Cannot cancel booking.",
-            500: "Internal server error."
-        }
-    )
-    def post(self, request, booking_id):
-        try:
-            booking = self.booking_service.cancel_booking(booking_id)
-            serializer = BookingSerializer(booking)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
+        except UnauthorizedOrInvalidBookingException as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
