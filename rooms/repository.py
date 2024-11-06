@@ -7,7 +7,7 @@ from bookings.enums import BookingStatus
 from bookings.models import Booking
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
-from utils.exceptions import RoomNotAvailableException
+from utils.exceptions import RoomNotAvailableException, RoomNotFoundException
 
 
 class RoomRepository:
@@ -28,6 +28,13 @@ class RoomRepository:
         if not room:
             raise Room.DoesNotExist
 
+        return room
+
+    @staticmethod
+    def get_room_by_number(room_number: str):
+        room = Room.objects.filter(number=room_number).first()
+        if not room:
+            raise RoomNotFoundException()
         return room
 
     @staticmethod

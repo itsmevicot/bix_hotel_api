@@ -72,4 +72,3 @@ class RoomAvailabilitySerializer(serializers.Serializer):
 class RoomListFilterSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=RoomStatus.choices(), required=False)
     room_type = serializers.ChoiceField(choices=RoomType.choices(), required=False)
-
