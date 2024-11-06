@@ -28,6 +28,14 @@ class RoomNotFoundException(ExceptionMessageBuilder):
 class RoomNotAvailableException(ExceptionMessageBuilder):
     def __init__(self):
         self.title = "Room not available"
+        self.message = "The requested room is not available."
+        self.status_code = status.HTTP_409_CONFLICT
+        self.detail = {"title": self.title, "message": self.message}
+
+
+class RoomNotAvailableForSelectedDatesException(ExceptionMessageBuilder):
+    def __init__(self):
+        self.title = "Room not available"
         self.message = "There are no available rooms for the selected dates."
         self.status_code = status.HTTP_409_CONFLICT
         self.detail = {"title": self.title, "message": self.message}

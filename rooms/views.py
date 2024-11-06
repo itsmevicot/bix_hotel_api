@@ -15,7 +15,7 @@ from rooms.serializers import (
 from rooms.services import RoomService
 from users.enums import UserRole
 from utils.custom_permissions import IsAdminUser
-from utils.exceptions import RoomNotAvailableException, RoomNotFoundException
+from utils.exceptions import RoomNotAvailableForSelectedDatesException, RoomNotFoundException
 
 
 class RoomListView(APIView):
@@ -128,10 +128,10 @@ class RoomAvailabilityView(APIView):
         self.room_service = room_service or RoomService()
 
     @swagger_auto_schema(
-        operation_description="Check if a specific room is available by room number.",
+        operation_description="Check the availability status of a specific room.",
         responses={
-            200: RoomAvailabilitySerializer,
-            404: "Room not found"
+            200: "Success",
+            404: "Room not found",
         }
     )
     def get(self, request, room_number):
@@ -139,18 +139,19 @@ class RoomAvailabilityView(APIView):
         serializer.is_valid(raise_exception=True)
 
         try:
-            is_available = self.room_service.check_availability_by_number(serializer.validated_data['room_number'])
+            room_status = self.room_service.check_availability_by_number(serializer.validated_data["room_number"])
             return Response(
-                RoomAvailabilitySerializer(
-                    {
-                        "room_number": room_number,
-                        "available": is_available
-                    }).data, status=status.HTTP_200_OK)
-        except RoomNotAvailableException as e:
-            return Response({"error": e.message}, status=e.status_code)
-
-        except RoomNotFoundException as e:
-            return Response({"error": e.message}, status=e.status_code)
+                {
+                    "status": "success",
+                    "room_status": room_status
+                },
+                status=status.HTTP_200_OK,
+            )
+        except RoomNotFoundException:
+            return Response(
+                {"error": "Room not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class RoomAvailabilityFilterView(APIView):
@@ -199,7 +200,5 @@ class RoomAvailabilityFilterView(APIView):
                 return Response({"message": "No rooms available for the specified criteria."},
                                 status=status.HTTP_404_NOT_FOUND)
 
-        except RoomNotAvailableException as e:
+        except RoomNotAvailableForSelectedDatesException as e:
             return Response({"error": e.message}, status=e.status_code)
-
-

@@ -14,7 +14,7 @@ from rooms.repository import RoomRepository
 from users.enums import UserRole
 from users.models import User
 from utils.email_service import EmailService
-from utils.exceptions import RoomNotAvailableException, InvalidBookingModificationException, \
+from utils.exceptions import RoomNotAvailableForSelectedDatesException, InvalidBookingModificationException, \
     UnauthorizedCancellationException, AlreadyCanceledException, \
     UnauthorizedOrInvalidBookingException
 
@@ -42,7 +42,7 @@ class BookingService:
         try:
             room = self.room_repository.get_available_room(room_type=room_type)
             if not room:
-                raise RoomNotAvailableException()
+                raise RoomNotAvailableForSelectedDatesException()
 
             booking = self.booking_repository.create_booking(
                 client=client,
@@ -62,7 +62,7 @@ class BookingService:
             })
             return booking
 
-        except RoomNotAvailableException as e:
+        except RoomNotAvailableForSelectedDatesException as e:
             logger.error("Room not available for booking: %s", e)
             raise
         except Exception as e:
@@ -90,7 +90,7 @@ class BookingService:
             if booking.room.room_type != room_type:
                 new_room = self.room_repository.get_available_room(room_type=room_type)
                 if not new_room:
-                    raise RoomNotAvailableException()
+                    raise RoomNotAvailableForSelectedDatesException()
 
                 booking.room.status = RoomStatus.AVAILABLE.value
                 booking.room.save()
@@ -102,7 +102,7 @@ class BookingService:
             if not self.booking_repository.is_room_available_excluding_booking(
                     booking.room.id, new_check_in_date, new_check_out_date, exclude_booking_id=booking_id
             ):
-                raise RoomNotAvailableException()
+                raise RoomNotAvailableForSelectedDatesException()
 
             booking.check_in_date = new_check_in_date
             booking.check_out_date = new_check_out_date
@@ -123,7 +123,7 @@ class BookingService:
             )
             return booking
 
-        except RoomNotAvailableException:
+        except RoomNotAvailableForSelectedDatesException:
             logger.error("Modification failed: room unavailable for new dates")
             raise
         except InvalidBookingModificationException:
@@ -170,7 +170,7 @@ class BookingService:
         try:
             booking = self.booking_repository.get_booking_by_id(booking_id)
 
-            if booking.client != user:
+            if booking.client != user and user.role != UserRole.ADMIN.value:
                 logger.warning(f"User {user.id} attempted to cancel booking {booking_id} they do not own.")
                 raise UnauthorizedCancellationException()
 

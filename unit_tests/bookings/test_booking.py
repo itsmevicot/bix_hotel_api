@@ -16,7 +16,7 @@ from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
 from users.enums import UserRole
 from users.models import User
-from utils.exceptions import RoomNotAvailableException, UnauthorizedOrInvalidBookingException
+from utils.exceptions import RoomNotAvailableForSelectedDatesException, UnauthorizedOrInvalidBookingException
 
 
 @pytest.fixture
@@ -88,7 +88,7 @@ def test_confirm_booking_success(booking_service, mock_user, booking_data):
 @pytest.mark.django_db
 def test_create_booking_no_room_available(booking_service, booking_data):
     with patch.object(booking_service.room_repository, 'get_available_room', return_value=None):
-        with pytest.raises(RoomNotAvailableException):
+        with pytest.raises(RoomNotAvailableForSelectedDatesException):
             booking_service.create_booking(
                 client=booking_data["client"],
                 check_in_date=booking_data["check_in_date"],
@@ -214,7 +214,7 @@ def test_get_booking_by_id_unauthorized(booking_service, mock_user):
 @pytest.mark.django_db
 def test_create_booking_no_room_available(booking_service, booking_data):
     with patch.object(booking_service.room_repository, 'get_available_room', return_value=None):
-        with pytest.raises(RoomNotAvailableException):
+        with pytest.raises(RoomNotAvailableForSelectedDatesException):
             booking_service.create_booking(
                 client=booking_data["client"],
                 check_in_date=booking_data["check_in_date"],

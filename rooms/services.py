@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
 from rooms.repository import RoomRepository
-from utils.exceptions import RoomNotFoundException, RoomNotAvailableException
+from utils.exceptions import RoomNotFoundException, RoomNotAvailableForSelectedDatesException, RoomNotAvailableException
 
 logger = logging.getLogger(__name__)
 
@@ -120,11 +120,11 @@ class RoomService:
     def check_availability_by_number(
             self,
             room_number: str
-    ) -> bool:
+    ) -> RoomStatus:
         room = self.room_repository.get_room_by_number(room_number)
-        if room.status != RoomStatus.AVAILABLE.value:
-            raise RoomNotAvailableException()
-        return True
+        if not room:
+            raise RoomNotFoundException()
+        return room.status
 
     def get_available_rooms(
             self,

@@ -13,7 +13,7 @@ from bookings.serializers import (
     BookingFilterSerializer, BookingUpdateSerializer
 )
 from bookings.services import BookingService
-from utils.exceptions import RoomNotAvailableException, InvalidBookingModificationException, \
+from utils.exceptions import RoomNotAvailableForSelectedDatesException, InvalidBookingModificationException, \
     UnauthorizedCancellationException, AlreadyCanceledException, \
     UnauthorizedOrInvalidBookingException
 
@@ -79,7 +79,7 @@ class BookingListView(APIView):
                     "booking_id": booking.id,
                     "room_id": booking.room.id
                 }, status=status.HTTP_201_CREATED)
-            except RoomNotAvailableException as e:
+            except RoomNotAvailableForSelectedDatesException as e:
                 return Response({
                     "status": "error",
                     "message": str(e)
@@ -145,7 +145,7 @@ class BookingDetailView(APIView):
                     room_type=room_type
                 )
                 return Response(BookingSerializer(booking).data, status=status.HTTP_200_OK)
-            except (InvalidBookingModificationException, RoomNotAvailableException) as e:
+            except (InvalidBookingModificationException, RoomNotAvailableForSelectedDatesException) as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

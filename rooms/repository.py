@@ -7,7 +7,7 @@ from bookings.enums import BookingStatus
 from bookings.models import Booking
 from rooms.enums import RoomStatus, RoomType
 from rooms.models import Room
-from utils.exceptions import RoomNotAvailableException, RoomNotFoundException
+from utils.exceptions import RoomNotAvailableForSelectedDatesException, RoomNotFoundException
 
 
 class RoomRepository:
@@ -44,7 +44,7 @@ class RoomRepository:
         room = Room.objects.filter(status=RoomStatus.AVAILABLE.value, room_type=room_type).first()
 
         if not room:
-            raise RoomNotAvailableException()
+            raise RoomNotAvailableForSelectedDatesException()
 
         return room
 

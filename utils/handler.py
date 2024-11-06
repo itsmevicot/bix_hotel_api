@@ -13,21 +13,20 @@ def custom_exception_handler(exc, context):
 
     if response is not None:
         custom_response = {
-            'status': 'error',
-            'message': response.data.get('detail', 'An error occurred.'),
+            "error": response.data.get("detail", "An error occurred.")
         }
 
-        if len(response.data) > 1:
-            custom_response['detail'] = {k: v for k, v in response.data.items() if k != 'detail'}
-        logger.error(f"Handled exception: {exc}, Context: {context}")
+        extra_details = {k: v for k, v in response.data.items() if k != "detail"}
+        if extra_details:
+            custom_response["detail"] = extra_details
 
+        logger.error(f"Handled exception: {exc}, Context: {context}")
         return Response(custom_response, status=response.status_code)
 
     if isinstance(exc, ExceptionMessageBuilder):
         custom_response = {
-            'status': 'error',
-            'message': exc.message,
-            'detail': exc.detail
+            "error": exc.message,
+            "detail": exc.detail
         }
         logger.error(f"Custom exception: {exc.message} - Details: {exc.detail}")
         return Response(custom_response, status=exc.status_code)
@@ -35,12 +34,16 @@ def custom_exception_handler(exc, context):
     logger.error("Unhandled exception occurred", exc_info=exc)
 
     if settings.DEBUG:
-        return Response({
-            'status': 'error',
-            'message': str(exc),
-        }, status=500)
+        return Response(
+            {
+                "error": str(exc),
+            },
+            status=500,
+        )
 
-    return Response({
-        'status': 'error',
-        'message': 'An unexpected error occurred.',
-    }, status=500)
+    return Response(
+        {
+            "error": "An unexpected error occurred.",
+        },
+        status=500,
+    )
